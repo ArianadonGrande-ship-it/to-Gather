@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>to Gather</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:    #f2f2f7;
+  --card:  #ffffff;
+  --nav-bg:rgba(242,242,247,.92);
+  --acc:   #5ac8fa;   /* 포인트: 밝은 틸/스카이 */
+  --acc2:  #34aadc;
+  --text:  #1c1c1e;
+  --text-m:#636366;
+  --text-l:#aeaeb2;
+  --border:#e5e5ea;
+  --sh:    0 1px 6px rgba(0,0,0,.07);
+  --sh2:   0 4px 20px rgba(0,0,0,.11);
+  --r:     18px;
+  --rs:    12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:'Nanum Gothic',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── TOP NAV ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 22px;
+  background:var(--nav-bg);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:'Jua',sans-serif;font-size:20px;
+  color:var(--text);
+  display:flex;align-items:center;gap:8px;
+  cursor:pointer;user-select:none;transition:opacity .15s;
+  letter-spacing:-.3px;
+}
+.logo .logo-to{font-size:14px;color:var(--text-m);font-weight:400;letter-spacing:.02em}
+.logo .logo-gather{font-size:20px;color:var(--text);letter-spacing:-.5px}
+.logo:hover{opacity:.7}
+.logo-icon{
+  width:30px;height:30px;border-radius:8px;
+  background:var(--acc);
+  display:flex;align-items:center;justify-content:center;
+}
+.logo-icon svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.nav-btns{display:flex;align-items:center;gap:8px}
+.nbtn{
+  width:38px;height:38px;border-radius:50%;border:none;
+  background:var(--card);
+  box-shadow:var(--sh);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;position:relative;
+  color:var(--text-m);
+}
+.nbtn:hover{background:var(--border)}
+.nbtn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nbtn.plus{
+  background:var(--acc);color:#fff;
+  width:38px;height:38px;
+  font-size:22px;font-weight:300;
+}
+.nbtn.plus:hover{background:var(--acc2)}
+.badge{
+  position:absolute;top:-2px;right:-2px;
+  width:16px;height:16px;border-radius:50%;
+  background:#ff3b30;color:#fff;
+  font-size:9px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--bg);
+}
+
+/* ── MAIN ── */
+.main{
+  position:relative;z-index:1;
+  padding:72px 16px 48px;
+  max-width:640px;margin:0 auto;
+}
+.page{display:none}
+.page.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HOME HERO ── */
+.home-hero{padding:20px 4px 26px}
+.home-hero h1{font-family:'Jua',sans-serif;font-size:24px;line-height:1.4;color:var(--text)}
+.home-hero h1 em{font-style:normal;color:var(--acc2)}
+.home-hero p{font-size:13px;color:var(--text-l);margin-top:5px}
+
+.sec-title{
+  font-size:13px;font-weight:700;
+  color:var(--text-m);
+  letter-spacing:.04em;text-transform:uppercase;
+  margin-bottom:10px;padding-left:2px;
+}
+
+/* ── MEETING CARDS ── */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.mcard{
+  background:var(--card);border-radius:var(--r);
+  padding:16px 14px;cursor:pointer;
+  transition:all .18s;
+  box-shadow:var(--sh);
+  border:1px solid var(--border);
+}
+.mcard:hover{transform:translateY(-2px);box-shadow:var(--sh2)}
+.mcard:active{transform:scale(.98)}
+.mcard .mc-icon{font-size:24px;margin-bottom:8px;line-height:1}
+.mcard .mc-name{font-family:'Jua',sans-serif;font-size:15px;margin-bottom:4px;color:var(--text)}
+.mcard .mc-meta{font-size:11px;color:var(--text-l);line-height:1.5}
+.sbadge{
+  display:inline-block;
+  padding:2px 8px;border-radius:6px;
+  font-size:11px;font-weight:700;margin-top:8px;
+}
+.sbadge.sched{background:#fff3cd;color:#856404}
+.sbadge.conf {background:#d1f5ea;color:#0a6640}
+.sbadge.past {background:#f2f2f7;color:#aeaeb2}
+.member-dots{display:flex;margin-top:10px}
+.mdot{
+  width:20px;height:20px;border-radius:50%;
+  border:2px solid var(--card);
+  background:var(--acc);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;margin-left:-5px;color:#fff;
+  font-weight:700;
+}
+.mdot:first-child{margin-left:0}
+
+/* ── CARD ── */
+.card{
+  background:var(--card);border-radius:var(--r);
+  padding:20px;box-shadow:var(--sh);margin-bottom:12px;
+  border:1px solid var(--border);
+}
+
+/* ── MEETING HEADER ── */
+.mhdr{
+  background:var(--card);border-radius:var(--r);
+  padding:20px;box-shadow:var(--sh);margin-bottom:12px;
+  border:1px solid var(--border);
+}
+.mhdr-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.mhdr-emoji{font-size:34px;line-height:1}
+.mhdr-name{font-family:'Jua',sans-serif;font-size:20px;color:var(--text)}
+.mhdr-sub{font-size:12px;color:var(--text-l);margin-top:2px}
+.code-box{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:var(--rs);padding:7px 13px;margin-top:6px;
+}
+.code-lbl{font-size:11px;color:var(--text-l)}
+.code-val{
+  font-family:'Jua',sans-serif;font-size:16px;
+  letter-spacing:3px;color:var(--text);
+}
+.copy-btn{
+  background:var(--acc);border:none;border-radius:7px;
+  padding:4px 10px;font-size:11px;cursor:pointer;
+  font-family:'Jua',sans-serif;color:#fff;
+  transition:all .15s;
+}
+.copy-btn:hover{background:var(--acc2)}
+.mem-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.mem-chip{
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg);border-radius:30px;
+  padding:5px 11px;font-size:12px;
+  border:1px solid var(--border);
+}
+.mem-chip .av{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--acc);
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;
+}
+.mem-chip .ck{color:var(--acc2);font-size:12px}
+
+/* ── TABS ── */
+.tabs{
+  display:flex;gap:0;margin-bottom:12px;
+  background:var(--card);border-radius:var(--rs);
+  padding:3px;box-shadow:var(--sh);border:1px solid var(--border);
+}
+.tab{
+  flex:1;padding:8px 6px;border-radius:9px;
+  border:none;background:transparent;
+  font-family:'Jua',sans-serif;font-size:13px;
+  cursor:pointer;transition:all .18s;color:var(--text-m);
+}
+.tab.on{background:var(--acc);color:#fff;box-shadow:0 1px 4px rgba(90,200,250,.3)}
+
+/* ── CALENDAR ── */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-mo{font-family:'Jua',sans-serif;font-size:16px;color:var(--text)}
+.cal-arr{
+  width:28px;height:28px;border-radius:50%;
+  border:none;background:var(--bg);
+  cursor:pointer;font-size:15px;color:var(--text-m);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.cal-arr:hover{background:var(--border)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;user-select:none}
+.dh{text-align:center;font-size:11px;color:var(--text-l);padding-bottom:5px;font-weight:700}
+.dh.su{color:#ff3b30}.dh.sa{color:#007aff}
+.dd{
+  aspect-ratio:1;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;cursor:pointer;transition:all .12s;
+  border:1px solid transparent;color:var(--text);
+}
+.dd:hover:not(.emp):not(.past){background:var(--border)}
+.dd.sel{background:var(--acc);color:#fff;font-weight:700;box-shadow:0 1px 6px rgba(90,200,250,.35)}
+.dd.today{border-color:var(--acc);font-weight:700}
+.dd.past{color:var(--text-l);cursor:default}
+.dd.emp{cursor:default}
+.dd.suc{color:#ff3b30}.dd.sac{color:#007aff}
+.dd.sel.suc,.dd.sel.sac{color:#fff}
+
+/* ── TIME SLOTS ── */
+.t-title{font-size:12px;font-weight:700;color:var(--text-l);margin:10px 0 5px;letter-spacing:.03em}
+.t-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:2px}
+.tbtn{
+  padding:8px 2px;border-radius:var(--rs);
+  border:1px solid var(--border);
+  background:var(--bg);font-size:12px;
+  cursor:pointer;transition:all .12s;text-align:center;
+  color:var(--text-m);font-family:'Nanum Gothic',sans-serif;
+}
+.tbtn:hover{border-color:var(--acc);color:var(--acc2)}
+.tbtn.sel{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+.anytime{
+  width:100%;padding:10px;border-radius:var(--rs);
+  border:1px dashed var(--text-l);background:transparent;
+  font-family:'Jua',sans-serif;font-size:14px;
+  color:var(--text-m);cursor:pointer;transition:all .18s;margin-bottom:10px;
+}
+.anytime:hover,.anytime.on{background:var(--acc);border-color:var(--acc);color:#fff}
+
+/* ── BIG BUTTONS ── */
+.bbtn{
+  width:100%;padding:14px;border-radius:var(--rs);border:none;
+  font-family:'Jua',sans-serif;font-size:15px;cursor:pointer;
+  transition:all .18s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  margin-top:10px;
+}
+.bbtn.p{background:var(--acc);color:#fff}
+.bbtn.p:hover{background:var(--acc2)}
+.bbtn.s{background:var(--bg);color:var(--text);border:1px solid var(--border)}
+.bbtn.s:hover{background:var(--border)}
+.bbtn.c{background:var(--text);color:#fff}
+.bbtn.c:hover{opacity:.85}
+.bbtn:active{opacity:.75;transform:scale(.98)}
+
+/* ── RESULT CARDS ── */
+.rcard{
+  border-radius:var(--r);padding:15px 16px;cursor:pointer;
+  transition:all .18s;
+  border:1px solid var(--border);
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:8px;background:var(--card);
+  box-shadow:var(--sh);
+}
+.rcard.best{border-color:var(--acc);background:#f0fbff}
+.rcard.picked{border-color:var(--acc2);box-shadow:0 0 0 3px rgba(90,200,250,.2)}
+.rcard:hover{transform:translateX(3px)}
+.rcard-icon{font-size:28px;flex-shrink:0}
+.rcard-info{flex:1}
+.rcard-date{font-family:'Jua',sans-serif;font-size:16px;color:var(--text)}
+.rcard-time{font-size:12px;color:var(--text-l);margin-top:3px}
+.rcard-cnt{
+  display:inline-block;
+  background:var(--bg);border-radius:6px;
+  padding:2px 8px;font-size:11px;margin-top:5px;
+  color:var(--text-m);font-weight:700;border:1px solid var(--border);
+}
+.best-tag{
+  background:var(--acc);color:#fff;
+  padding:2px 8px;border-radius:6px;
+  font-size:11px;font-weight:700;white-space:nowrap;
+}
+.sel-circle{
+  width:20px;height:20px;border-radius:50%;
+  border:1.5px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  transition:all .15s;
+}
+.rcard.picked .sel-circle{background:var(--acc);border-color:var(--acc);color:#fff}
+
+/* ── PROGRESS ── */
+.prog{height:4px;border-radius:2px;background:var(--border);margin-top:6px;overflow:hidden}
+.prog-fill{height:100%;border-radius:2px;background:var(--acc);transition:width .5s ease}
+
+/* ── CHAT ── */
+.chat-wrap{max-height:240px;overflow-y:auto;margin-bottom:10px;padding-right:4px}
+.cmsg{display:flex;gap:7px;align-items:flex-end;margin-bottom:8px}
+.cmsg.mine{flex-direction:row-reverse}
+.cav{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--acc);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;
+}
+.cbubble{
+  max-width:200px;padding:8px 12px;
+  border-radius:16px 16px 16px 4px;
+  font-size:13px;line-height:1.4;
+  background:var(--bg);border:1px solid var(--border);color:var(--text);
+}
+.cmsg.mine .cbubble{
+  border-radius:16px 16px 4px 16px;
+  background:var(--acc);border-color:transparent;color:#fff;
+}
+.cwho{font-size:10px;color:var(--text-l);margin-bottom:2px}
+.cmsg.mine .cwho{text-align:right}
+.cinput-row{display:flex;gap:7px}
+.cinput{
+  flex:1;padding:9px 14px;border-radius:20px;
+  border:1px solid var(--border);
+  background:var(--bg);
+  font-family:'Nanum Gothic',sans-serif;font-size:13px;outline:none;
+  transition:border-color .15s;color:var(--text);
+}
+.cinput:focus{border-color:var(--acc)}
+.csend{
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:var(--acc);color:#fff;cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.csend:hover{background:var(--acc2)}
+
+/* ── NOTIF PANEL ── */
+.npanel{
+  position:fixed;top:64px;right:14px;width:280px;
+  background:var(--card);border-radius:var(--r);
+  box-shadow:var(--sh2);border:1px solid var(--border);
+  z-index:1500;overflow:hidden;
+  transform:translateY(-8px) scale(.96);opacity:0;
+  pointer-events:none;transition:all .2s cubic-bezier(.34,1.56,.64,1);
+}
+.npanel.open{transform:translateY(0) scale(1);opacity:1;pointer-events:all}
+.np-hdr{
+  padding:13px 15px;font-family:'Jua',sans-serif;font-size:14px;color:var(--text);
+  border-bottom:1px solid var(--border);
+}
+.ni{
+  padding:11px 15px;border-bottom:1px solid var(--border);
+  font-size:12px;line-height:1.5;display:flex;gap:9px;align-items:flex-start;
+  color:var(--text);
+}
+.ni-ic{font-size:16px;flex-shrink:0;margin-top:1px}
+.ni-t{font-size:10px;color:var(--text-l);margin-top:2px}
+
+/* ── MYPAGE ── */
+.prof-center{text-align:center;padding:24px 0 16px}
+.prof-av{
+  width:80px;height:80px;border-radius:50%;
+  background:var(--bg);border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 12px;
+  cursor:pointer;transition:opacity .15s;position:relative;overflow:hidden;
+}
+.prof-av:hover{opacity:.8}
+.prof-av svg{width:100%;height:100%}
+.av-edit{
+  position:absolute;bottom:0;right:0;
+  width:22px;height:22px;border-radius:50%;
+  background:var(--acc);font-size:11px;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--card);
+}
+.pname{font-family:'Jua',sans-serif;font-size:20px;color:var(--text)}
+.pjoin{font-size:12px;color:var(--text-l);margin-top:3px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.sbox{
+  background:var(--card);border-radius:var(--rs);
+  padding:14px 10px;text-align:center;
+  box-shadow:var(--sh);border:1px solid var(--border);
+}
+.snum{font-family:'Jua',sans-serif;font-size:24px;color:var(--acc2)}
+.slbl{font-size:11px;color:var(--text-l);margin-top:2px}
+
+/* ── MODAL ── */
+.mov{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.35);backdrop-filter:blur(6px);
+  z-index:2000;display:flex;align-items:center;justify-content:center;padding:18px;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.mov.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--card);border-radius:22px;
+  padding:26px 22px;max-width:420px;width:100%;
+  box-shadow:0 16px 48px rgba(0,0,0,.16);
+  transform:scale(.94) translateY(12px);
+  transition:all .25s cubic-bezier(.34,1.56,.64,1);
+  position:relative;
+}
+.mov.open .modal{transform:scale(1) translateY(0)}
+.modal-title{
+  font-family:'Jua',sans-serif;font-size:18px;
+  color:var(--text);margin-bottom:18px;
+}
+.mclose{
+  position:absolute;top:14px;right:16px;
+  font-size:17px;cursor:pointer;background:none;border:none;
+  color:var(--text-l);transition:color .15s;
+}
+.mclose:hover{color:var(--text)}
+.inp{
+  width:100%;padding:10px 13px;border-radius:var(--rs);
+  border:1px solid var(--border);
+  background:var(--bg);
+  font-family:'Nanum Gothic',sans-serif;font-size:13px;color:var(--text);
+  outline:none;transition:border-color .15s;margin-bottom:8px;
+}
+.inp:focus{border-color:var(--acc)}
+.inp-lbl{font-size:12px;font-weight:700;color:var(--text-m);margin-bottom:5px;display:block;letter-spacing:.02em}
+
+/* character grid */
+#avOpts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.char-opt{
+  border-radius:var(--rs);border:1.5px solid var(--border);
+  background:var(--bg);
+  cursor:pointer;padding:7px 4px 5px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  transition:all .15s;
+}
+.char-opt:hover{border-color:var(--acc);background:#f0fbff}
+.char-opt.on{border-color:var(--acc);background:#f0fbff;box-shadow:0 0 0 2px rgba(90,200,250,.25)}
+.char-svg{width:46px;height:46px}
+.char-name{font-size:10px;color:var(--text-m);text-align:center;line-height:1.2;font-weight:700}
+.prof-av svg{width:100%;height:100%}
+
+/* emoji picker */
+.ep{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.eo{
+  width:36px;height:36px;border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--bg);font-size:18px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .12s;
+}
+.eo:hover,.eo.on{border-color:var(--acc);background:#f0fbff}
+
+/* misc */
+.join-row{display:flex;gap:8px}
+.back{
+  display:inline-flex;align-items:center;gap:5px;
+  background:none;border:none;font-family:'Jua',sans-serif;font-size:14px;
+  color:var(--text-l);cursor:pointer;margin-bottom:14px;
+  transition:color .15s;
+}
+.back:hover{color:var(--acc2)}
+.divider{height:1px;background:var(--border);margin:12px 0}
+.toast{
+  position:fixed;bottom:26px;left:50%;
+  transform:translateX(-50%) translateY(70px);
+  background:rgba(28,28,30,.9);color:#fff;
+  padding:10px 20px;border-radius:22px;
+  font-size:13px;font-weight:700;
+  z-index:9999;opacity:0;transition:all .25s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.confetti{position:fixed;pointer-events:none;z-index:9990}
+@keyframes fly{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(-160px) rotate(540deg);opacity:0}}
+
+.mc-icon:empty{display:none}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="logo" onclick="goHome()">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <span class="logo-to">to</span><span class="logo-gather">Gather</span>
+  </div>
+  <div class="nav-btns">
+    <button class="nbtn plus" onclick="openMov('create')" title="새 모임 만들기">＋</button>
+    <button class="nbtn" onclick="toggleNotif()" id="nBtn" title="알림">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="badge" id="nbadge">3</span>
+    </button>
+    <button class="nbtn" onclick="goMypage()" title="마이페이지" id="mypageBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- NOTIF PANEL -->
+<div class="npanel" id="npanel">
+  <div class="np-hdr">알림</div>
+  <div class="ni"><span class="ni-ic">💌</span><div><div><b>민지</b>님이 <b>애기엄마 모임</b>에 참여했어요!</div><div class="ni-t">방금 전</div></div></div>
+  <div class="ni"><span class="ni-ic">✓</span><div><div><b>주말 브런치</b> 일정이 확정됐어요!</div><div class="ni-t">5분 전</div></div></div>
+  <div class="ni"><span class="ni-ic">📅</span><div><div><b>벚꽃 피크닉</b> 가능한 날짜를 입력해주세요!</div><div class="ni-t">1시간 전</div></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="main">
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="home-hero">
+      <h1><em>투게더</em>에 오신 걸 환영해요</h1>
+      <p>소중한 사람들과의 만남, 쉽게 정해봐요</p>
+    </div>
+
+    <div class="sec-title">진행 중인 모임</div>
+    <div class="mgrid">
+      <div class="mcard c1" onclick="goMeeting(0)">
+        <div class="mc-icon" id="mc-icon-0">🌸</div>
+        <div class="mc-name">애기엄마 모임</div>
+        <div class="mc-meta">멤버 5명</div>
+        <div class="sbadge sched">일정 조율 중</div>
+        <div class="member-dots">
+          <div class="mdot">유</div><div class="mdot">민</div>
+          <div class="mdot">지</div><div class="mdot">수</div>
+          <div class="mdot" style="font-size:9px">+1</div>
+        </div>
+      </div>
+      <div class="mcard c2" onclick="goMeeting(1)">
+        <div class="mc-icon" id="mc-icon-1">🌷</div>
+        <div class="mc-name">벚꽃 피크닉</div>
+        <div class="mc-meta">멤버 3명</div>
+        <div class="sbadge sched">일정 조율 중</div>
+        <div class="member-dots">
+          <div class="mdot">유</div><div class="mdot">소</div>
+          <div class="mdot">연</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-title">확정된 모임</div>
+    <div class="mgrid">
+      <div class="mcard c3">
+        <div class="mc-name">주말 브런치</div>
+        <div class="mc-meta">5월 31일 (토) 11:00</div>
+        <div class="sbadge conf">확정</div>
+        <div class="member-dots">
+          <div class="mdot">유</div><div class="mdot">민</div>
+        </div>
+      </div>
+      <div class="mcard c4">
+        <div class="mc-name">생일 파티</div>
+        <div class="mc-meta">4월 19일 (토) 18:00</div>
+        <div class="sbadge past">지난 모임</div>
+        <div class="member-dots">
+          <div class="mdot">유</div><div class="mdot">민</div>
+          <div class="mdot">지</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title" style="margin-bottom:11px">참여코드로 입장하기</div>
+      <div class="join-row">
+        <input class="inp" id="joinInp" placeholder="참여코드 입력 (예: TG-8472)" style="margin-bottom:0;flex:1">
+        <button class="bbtn p" style="width:auto;margin-top:0;padding:11px 18px;border-radius:var(--rs);font-size:14px" onclick="joinCode()">입장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEETING -->
+  <div class="page" id="page-meeting">
+    <button class="back" onclick="goHome()">← 돌아가기</button>
+
+    <div class="mhdr" id="mhdrEl">
+      <div class="mhdr-row">
+        <span class="mhdr-emoji" id="mEmojiEl"></span>
+        <div>
+          <div class="mhdr-name" id="mNameEl">애기엄마 모임</div>
+          <div class="mhdr-sub"  id="mSubEl">멤버 5명 · 일정 조율 중</div>
+        </div>
+      </div>
+      <div class="code-box">
+        <span class="code-lbl">초대코드</span>
+        <span class="code-val" id="mCodeEl">TG-1234</span>
+        <button class="copy-btn" onclick="copyCode()">복사</button>
+      </div>
+      <div class="mem-row" id="memRowEl"></div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab on"  onclick="swTab(0)" id="tab0">내 일정</button>
+      <button class="tab"     onclick="swTab(1)" id="tab1">멤버 현황</button>
+      <button class="tab"     onclick="swTab(2)" id="tab2">채팅</button>
+    </div>
+
+    <!-- TAB0 -->
+    <div id="tc0">
+      <div class="card">
+        <div class="sec-title">가능한 날짜</div>
+        <div class="cal-nav">
+          <button class="cal-arr" onclick="chMo(-1)">‹</button>
+          <div class="cal-mo" id="calMoEl"></div>
+          <button class="cal-arr" onclick="chMo(1)">›</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div class="card">
+        <div class="sec-title">가능한 시간대</div>
+        <button class="anytime" id="anytimeBtn" onclick="togAnytime()">아무때나 가능해요!</button>
+        <div id="timeSlots"></div>
+      </div>
+      <button class="bbtn p" onclick="saveSched()">내 일정 저장하기</button>
+      <button class="bbtn s" onclick="findTime()" style="margin-top:8px">언제 모일 수 있을까?</button>
+    </div>
+
+    <!-- TAB1 -->
+    <div id="tc1" style="display:none">
+      <div class="card">
+        <div class="sec-title">멤버 입력 현황</div>
+        <div id="memStatusEl"></div>
+      </div>
+    </div>
+
+    <!-- TAB2 -->
+    <div id="tc2" style="display:none">
+      <div class="card">
+        <div class="sec-title">채팅</div>
+        <div class="chat-wrap" id="chatWrap">
+          <div class="cmsg">
+            <div class="cav">민</div>
+            <div><div class="cwho">민지</div>
+            <div class="cbubble">저는 주말 오전이 편해요~!</div></div>
+          </div>
+          <div class="cmsg mine">
+            <div class="cav">나</div>
+            <div><div class="cwho">나</div>
+            <div class="cbubble">저도 일정 입력했어요</div></div>
+          </div>
+          <div class="cmsg">
+            <div class="cav" style="background:linear-gradient(135deg,var(--lavender),var(--sky))">수</div>
+            <div><div class="cwho">수연</div>
+            <div class="cbubble">어디서 만날지도 정해봐요</div></div>
+          </div>
+        </div>
+        <div class="cinput-row">
+          <input class="cinput" id="chatInp" placeholder="메시지를 입력해주세요..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="csend" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="resultSec" style="display:none">
+      <div class="divider"></div>
+      <div class="sec-title">모두 모일 수 있는 날</div>
+      <div id="resultCards"></div>
+      <button class="bbtn c" onclick="confirmMtg()" id="confBtn" style="display:none">일정 확정하기</button>
+    </div>
+  </div>
+
+  <!-- MYPAGE -->
+  <div class="page" id="page-mypage">
+    <button class="back" onclick="goHome()">← 돌아가기</button>
+    <div class="card">
+      <div class="prof-center">
+        <div class="prof-av" onclick="scrollToAv()">
+          <span id="profEmoji">🌸</span>
+          <div class="av-edit">✏️</div>
+        </div>
+        <div class="pname" id="profName">유진</div>
+        <div class="pjoin">2026년 3월부터 함께해요</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:4px">
+        <input class="inp" id="nickInp" placeholder="닉네임 변경" style="margin-bottom:0;flex:1">
+        <button class="bbtn p" style="width:auto;margin-top:0;padding:10px 16px;border-radius:var(--rs);font-size:13px" onclick="changeName()">변경</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="sbox"><div class="snum">4</div><div class="slbl">참여 모임</div></div>
+      <div class="sbox"><div class="snum">2</div><div class="slbl">확정 모임</div></div>
+      <div class="sbox"><div class="snum">7</div><div class="slbl">함께한 친구</div></div>
+    </div>
+    <div class="card">
+      <div class="sec-title" style="margin-bottom:11px">캐릭터 선택</div>
+      <div class="ep" id="avOpts"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODAL: create -->
+<div class="mov" id="mov-create" onclick="movOut(event,'create')">
+  <div class="modal">
+    <button class="mclose" onclick="closeMov('create')">✕</button>
+    <div class="modal-title">새 모임 만들기</div>
+    <span class="inp-lbl">모임 아이콘 (선택사항)</span>
+    <div class="ep" id="cEmojiPick"></div>
+    <span class="inp-lbl">모임 이름</span>
+    <input class="inp" id="cName" placeholder="예) 애기엄마 모임, 벚꽃 피크닉...">
+    <span class="inp-lbl">친구 초대 (쉼표로 구분)</span>
+    <input class="inp" id="cMembers" placeholder="예) 민지, 수연, 지현">
+    <button class="bbtn p" onclick="createMtg()">모임 만들기</button>
+  </div>
+</div>
+
+<!-- MODAL: confirmed -->
+<div class="mov" id="mov-confirmed" onclick="movOut(event,'confirmed')">
+  <div class="modal" style="text-align:center">
+    <button class="mclose" onclick="closeMov('confirmed')">✕</button>
+    <div class="modal-title">일정이 확정됐어요!</div>
+    <div id="confDetail" style="font-size:14px;color:var(--text-m);margin-bottom:18px;line-height:1.8;white-space:pre-line"></div>
+    <button class="bbtn p" onclick="closeMov('confirmed')">확인</button>
+  </div>
+</div>
+
+<script>
+/* ── STATE ── */
+let curMtg=0, calY=2026, calM=5;
+let selDates=new Set(), selTimes=new Set();
+let anytime=false, selResult=-1, notifOpen=false;
+let selCrtEmoji=null;
+let profEmoji='🌸', profName='유진';
+/* ── SANRIO SVG CHARACTERS ── */
+const sanrioChars = [
+  { id:'kitty', name:'헬로키티', color:'#fff0f5', accent:'#f499bb',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="33" rx="18" ry="17" fill="white" stroke="#d4a0b0" stroke-width="1.2"/>
+      <circle cx="21" cy="26" r="5.5" fill="white" stroke="#d4a0b0" stroke-width="1.2"/>
+      <circle cx="39" cy="26" r="5.5" fill="white" stroke="#d4a0b0" stroke-width="1.2"/>
+      <ellipse cx="30" cy="32" rx="12" ry="11" fill="white"/>
+      <circle cx="24" cy="31" r="2.5" fill="#333"/>
+      <circle cx="36" cy="31" r="2.5" fill="#333"/>
+      <ellipse cx="30" cy="37" rx="3" ry="2" fill="#f9b8cc"/>
+      <line x1="18" y1="35" x2="10" y2="33" stroke="#ccc" stroke-width="1"/>
+      <line x1="18" y1="37" x2="10" y2="37" stroke="#ccc" stroke-width="1"/>
+      <line x1="18" y1="39" x2="10" y2="41" stroke="#ccc" stroke-width="1"/>
+      <line x1="42" y1="35" x2="50" y2="33" stroke="#ccc" stroke-width="1"/>
+      <line x1="42" y1="37" x2="50" y2="37" stroke="#ccc" stroke-width="1"/>
+      <line x1="42" y1="39" x2="50" y2="41" stroke="#ccc" stroke-width="1"/>
+      <g transform="translate(34,14)">
+        <path d="M0,0 C-4,-6 -10,-6 -8,0 C-6,4 0,6 0,6 C0,6 6,4 8,0 C10,-6 4,-6 0,0Z" fill="#f499bb"/>
+        <circle cx="0" cy="1" r="2.5" fill="#e8659a"/>
+      </g>
+    </svg>`},
+  { id:'melody', name:'마이멜로디', color:'#fff0f8', accent:'#f9b8d4',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="36" rx="16" ry="14" fill="white" stroke="#e8aac8" stroke-width="1.2"/>
+      <ellipse cx="30" cy="28" rx="14" ry="13" fill="#f9c8de" stroke="#e8aac8" stroke-width="1.2"/>
+      <path d="M16,25 Q10,10 22,14 Q26,16 30,14 Q34,16 38,14 Q50,10 44,25" fill="#f9c8de" stroke="#e8aac8" stroke-width="1.2"/>
+      <ellipse cx="30" cy="34" rx="10" ry="9" fill="white"/>
+      <circle cx="26" cy="33" r="2.2" fill="#333"/>
+      <circle cx="34" cy="33" r="2.2" fill="#333"/>
+      <ellipse cx="30" cy="38" rx="2.5" ry="1.5" fill="#f9b8cc"/>
+      <ellipse cx="22" cy="40" rx="3.5" ry="2" fill="#f499bb" opacity="0.5"/>
+      <ellipse cx="38" cy="40" rx="3.5" ry="2" fill="#f499bb" opacity="0.5"/>
+      <g transform="translate(17,18)">
+        <path d="M0,0 C-3,-5 -8,-4 -6,1 C-4,4 0,5 0,5 C0,5 4,4 6,1 C8,-4 3,-5 0,0Z" fill="#e8659a"/>
+        <circle cx="0" cy="1" r="2" fill="#c8458a"/>
+      </g>
+    </svg>`},
+  { id:'cinnamoroll', name:'시나모롤', color:'#f0f6ff', accent:'#a0c8f0',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="35" rx="18" ry="15" fill="white" stroke="#b8d8f0" stroke-width="1.2"/>
+      <circle cx="30" cy="26" r="15" fill="white" stroke="#b8d8f0" stroke-width="1.2"/>
+      <ellipse cx="14" cy="22" rx="7" ry="11" fill="white" stroke="#b8d8f0" stroke-width="1.2" transform="rotate(-15,14,22)"/>
+      <ellipse cx="46" cy="22" rx="7" ry="11" fill="white" stroke="#b8d8f0" stroke-width="1.2" transform="rotate(15,46,22)"/>
+      <ellipse cx="14" cy="22" rx="4" ry="7" fill="#e8d0f0" transform="rotate(-15,14,22)"/>
+      <ellipse cx="46" cy="22" rx="4" ry="7" fill="#e8d0f0" transform="rotate(15,46,22)"/>
+      <circle cx="25" cy="27" r="2.5" fill="#333"/>
+      <circle cx="35" cy="27" r="2.5" fill="#333"/>
+      <ellipse cx="30" cy="32" rx="2.5" ry="1.5" fill="#f9b8cc"/>
+      <circle cx="25.5" cy="25.5" r="1" fill="white"/>
+      <circle cx="35.5" cy="25.5" r="1" fill="white"/>
+      <path d="M25,35 Q30,38 35,35" stroke="#b8d8f0" stroke-width="1.2" fill="none"/>
+      <ellipse cx="22" cy="36" rx="3" ry="2" fill="#f9c8de" opacity="0.6"/>
+      <ellipse cx="38" cy="36" rx="3" ry="2" fill="#f9c8de" opacity="0.6"/>
+    </svg>`},
+  { id:'kuromi', name:'쿠로미', color:'#f0eeff', accent:'#9988cc',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="35" rx="16" ry="14" fill="white" stroke="#9988cc" stroke-width="1.2"/>
+      <path d="M14,28 Q16,10 30,12 Q44,10 46,28 Q44,35 30,36 Q16,35 14,28Z" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="1"/>
+      <path d="M18,22 L14,10 L24,20Z" fill="#2a2a2a"/>
+      <path d="M42,22 L46,10 L36,20Z" fill="#2a2a2a"/>
+      <path d="M18,22 L16,12 L23,20Z" fill="#cc44aa"/>
+      <path d="M42,22 L44,12 L37,20Z" fill="#cc44aa"/>
+      <ellipse cx="30" cy="30" rx="11" ry="9" fill="white"/>
+      <circle cx="25" cy="29" r="2.5" fill="#333"/>
+      <circle cx="35" cy="29" r="2.5" fill="#333"/>
+      <circle cx="25.8" cy="28.2" r="1" fill="white"/>
+      <circle cx="35.8" cy="28.2" r="1" fill="white"/>
+      <ellipse cx="30" cy="34" rx="2" ry="1.5" fill="#f9b8cc"/>
+      <ellipse cx="22" cy="37" rx="3" ry="1.8" fill="#f499bb" opacity="0.5"/>
+      <ellipse cx="38" cy="37" rx="3" ry="1.8" fill="#f499bb" opacity="0.5"/>
+      <circle cx="30" cy="22" r="3" fill="#cc44aa"/>
+      <text x="30" y="24.5" text-anchor="middle" font-size="4" fill="white">💀</text>
+    </svg>`},
+  { id:'pompom', name:'폼폼푸린', color:'#fffbe8", accent:"#f5d060',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="40" rx="20" ry="10" fill="#f5d878" stroke="#d4a820" stroke-width="1"/>
+      <circle cx="30" cy="28" r="17" fill="#f5e090" stroke="#d4a820" stroke-width="1.2"/>
+      <ellipse cx="19" cy="22" rx="6" ry="4" fill="#8b5e2a" stroke="#6b3e0a" stroke-width="1" transform="rotate(-20,19,22)"/>
+      <ellipse cx="41" cy="22" rx="6" ry="4" fill="#8b5e2a" stroke="#6b3e0a" stroke-width="1" transform="rotate(20,41,22)"/>
+      <circle cx="24" cy="29" r="3" fill="#333"/>
+      <circle cx="36" cy="29" r="3" fill="#333"/>
+      <circle cx="25" cy="28" r="1.2" fill="white"/>
+      <circle cx="37" cy="28" r="1.2" fill="white"/>
+      <ellipse cx="30" cy="34" rx="3" ry="2" fill="#f9a8b0"/>
+      <ellipse cx="21" cy="37" rx="4" ry="2.5" fill="#f9c840" opacity="0.5"/>
+      <ellipse cx="39" cy="37" rx="4" ry="2.5" fill="#f9c840" opacity="0.5"/>
+      <path d="M25,36 Q30,40 35,36" stroke="#d4a820" stroke-width="1.2" fill="none"/>
+    </svg>`},
+  { id:'keroppi', name:'케로피', color:'#eefff5', accent:'#66cc88',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="30" cy="32" r="18" fill="#66cc88" stroke="#44aa66" stroke-width="1.2"/>
+      <ellipse cx="22" cy="24" rx="8" ry="7" fill="#88ee99" stroke="#44aa66" stroke-width="1"/>
+      <ellipse cx="38" cy="24" rx="8" ry="7" fill="#88ee99" stroke="#44aa66" stroke-width="1"/>
+      <circle cx="22" cy="25" r="4.5" fill="white"/>
+      <circle cx="38" cy="25" r="4.5" fill="white"/>
+      <circle cx="22" cy="26" r="2.5" fill="#1a1a1a"/>
+      <circle cx="38" cy="26" r="2.5" fill="#1a1a1a"/>
+      <circle cx="22.8" cy="25.2" r="1" fill="white"/>
+      <circle cx="38.8" cy="25.2" r="1" fill="white"/>
+      <ellipse cx="30" cy="36" rx="8" ry="5" fill="#88ee99"/>
+      <path d="M23,37 Q30,42 37,37" stroke="#44aa66" stroke-width="1.2" fill="none"/>
+      <ellipse cx="21" cy="40" rx="4" ry="2.5" fill="#55bb77" opacity="0.4"/>
+      <ellipse cx="39" cy="40" rx="4" ry="2.5" fill="#55bb77" opacity="0.4"/>
+    </svg>`},
+  { id:'badtz', name:'배드바츠마루', color:'#eeeeff', accent:'#6666cc',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="38" rx="16" ry="12" fill="#f5e870" stroke="#ccaa00" stroke-width="1"/>
+      <circle cx="30" cy="26" r="16" fill="#1a1a2a" stroke="#000" stroke-width="1.2"/>
+      <path d="M18,16 L14,6 L22,15Z M42,16 L46,6 L38,15Z" fill="#2a2a3a"/>
+      <ellipse cx="30" cy="28" rx="12" ry="10" fill="#1a1a2a"/>
+      <circle cx="24" cy="26" r="4" fill="white"/>
+      <circle cx="36" cy="26" r="4" fill="white"/>
+      <circle cx="24" cy="27" r="2.5" fill="#1a1aee"/>
+      <circle cx="36" cy="27" r="2.5" fill="#1a1aee"/>
+      <circle cx="24.8" cy="26.2" r="1" fill="white"/>
+      <circle cx="36.8" cy="26.2" r="1" fill="white"/>
+      <ellipse cx="30" cy="33" rx="3" ry="2" fill="#ffaaaa"/>
+      <path d="M24,35 Q30,39 36,35" stroke="#555" stroke-width="1.2" fill="none"/>
+    </svg>`},
+  { id:'tuxedo', name:'턱시도샘', color:'#eef6ff', accent:'#88aacc',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="30" cy="28" r="16" fill="white" stroke="#ccc" stroke-width="1.2"/>
+      <path d="M18,32 Q14,28 16,22 Q18,14 30,13 Q42,14 44,22 Q46,28 42,32Z" fill="#1a1a2a" stroke="#000" stroke-width="1"/>
+      <ellipse cx="30" cy="30" rx="10" ry="9" fill="white"/>
+      <circle cx="25" cy="28" r="2.5" fill="#333"/>
+      <circle cx="35" cy="28" r="2.5" fill="#333"/>
+      <circle cx="25.8" cy="27.2" r="1" fill="white"/>
+      <circle cx="35.8" cy="27.2" r="1" fill="white"/>
+      <ellipse cx="30" cy="33" rx="2.5" ry="1.5" fill="#f9a8c0"/>
+      <path d="M25,35 Q30,38 35,35" stroke="#aaa" stroke-width="1.2" fill="none"/>
+      <g transform="translate(26,38)">
+        <path d="M0,-3 C-2,-6 -5,-5 -4,-2 C-3,0 0,2 0,2 C0,2 3,0 4,-2 C5,-5 2,-6 0,-3Z" fill="#cc4466"/>
+      </g>
+      <ellipse cx="22" cy="37" rx="3" ry="2" fill="#f499bb" opacity="0.5"/>
+      <ellipse cx="38" cy="37" rx="3" ry="2" fill="#f499bb" opacity="0.5"/>
+    </svg>`},
+  { id:'pochacco', name:'포차코', color:'#f0f8ff', accent:'#a0c0e8',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="30" cy="30" r="18" fill="white" stroke="#c0d8f0" stroke-width="1.2"/>
+      <ellipse cx="18" cy="20" rx="7" ry="9" fill="white" stroke="#c0d8f0" stroke-width="1.2" transform="rotate(-10,18,20)"/>
+      <ellipse cx="42" cy="20" rx="7" ry="9" fill="white" stroke="#c0d8f0" stroke-width="1.2" transform="rotate(10,42,20)"/>
+      <ellipse cx="18" cy="21" rx="4" ry="5.5" fill="#f0d8e8" transform="rotate(-10,18,21)"/>
+      <ellipse cx="42" cy="21" rx="4" ry="5.5" fill="#f0d8e8" transform="rotate(10,42,21)"/>
+      <circle cx="25" cy="30" r="3" fill="#333"/>
+      <circle cx="35" cy="30" r="3" fill="#333"/>
+      <circle cx="26" cy="29" r="1.2" fill="white"/>
+      <circle cx="36" cy="29" r="1.2" fill="white"/>
+      <ellipse cx="30" cy="35" rx="3" ry="2" fill="#f9b8cc"/>
+      <path d="M25,37 Q30,41 35,37" stroke="#c0d8f0" stroke-width="1.2" fill="none"/>
+      <ellipse cx="21" cy="39" rx="3.5" ry="2" fill="#f9c8de" opacity="0.5"/>
+      <ellipse cx="39" cy="39" rx="3.5" ry="2" fill="#f9c8de" opacity="0.5"/>
+    </svg>`},
+  { id:'littletwin', name:'리틀트윈스타', color:'#f8f0ff', accent:'#cc99ee',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="21" cy="30" r="12" fill="#fff8b0" stroke="#e8c830" stroke-width="1"/>
+      <circle cx="39" cy="30" r="12" fill="#f0d8ff" stroke="#c888ee" stroke-width="1"/>
+      <circle cx="20" cy="28" r="2.2" fill="#333"/>
+      <circle cx="38" cy="28" r="2.2" fill="#333"/>
+      <circle cx="20.7" cy="27.3" r="0.9" fill="white"/>
+      <circle cx="38.7" cy="27.3" r="0.9" fill="white"/>
+      <ellipse cx="20" cy="32" rx="2" ry="1.2" fill="#f9a8b0"/>
+      <ellipse cx="38" cy="32" rx="2" ry="1.2" fill="#f9a8b0"/>
+      <path d="M17,34 Q20,37 23,34" stroke="#e8c830" stroke-width="1" fill="none"/>
+      <path d="M35,34 Q38,37 41,34" stroke="#c888ee" stroke-width="1" fill="none"/>
+      <polygon points="21,12 22.5,17 18,14 24,14 19.5,17" fill="#f5d030" stroke="#e8b020" stroke-width="0.5"/>
+      <polygon points="39,10 40.5,15 36,12 42,12 37.5,15" fill="#dd88ee" stroke="#bb66cc" stroke-width="0.5"/>
+    </svg>`},
+  { id:'charmmy', name:'참미키티', color:'#fff5f8', accent:'#f0a0b8',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="33" rx="17" ry="16" fill="white" stroke="#d0a8b8" stroke-width="1.2"/>
+      <circle cx="20" cy="24" r="6" fill="white" stroke="#d0a8b8" stroke-width="1.2"/>
+      <circle cx="40" cy="24" r="6" fill="white" stroke="#d0a8b8" stroke-width="1.2"/>
+      <ellipse cx="30" cy="32" rx="12" ry="10" fill="white"/>
+      <circle cx="25" cy="30" r="2.5" fill="#333"/>
+      <circle cx="35" cy="30" r="2.5" fill="#333"/>
+      <ellipse cx="30" cy="36" rx="3" ry="2" fill="#f9c8d8"/>
+      <line x1="19" y1="34" x2="11" y2="32" stroke="#ddd" stroke-width="1"/>
+      <line x1="19" y1="36" x2="11" y2="36" stroke="#ddd" stroke-width="1"/>
+      <line x1="41" y1="34" x2="49" y2="32" stroke="#ddd" stroke-width="1"/>
+      <line x1="41" y1="36" x2="49" y2="36" stroke="#ddd" stroke-width="1"/>
+      <g transform="translate(22,14) rotate(-20)">
+        <path d="M0,0 C-4,-6 -9,-5 -7,0 C-5,3 0,5 0,5 C0,5 5,3 7,0 C9,-5 4,-6 0,0Z" fill="#f0a0b8"/>
+        <circle cx="0" cy="1" r="2" fill="#d87898"/>
+      </g>
+    </svg>`},
+  { id:'hangyodon', name:'한교돈', color:'#eef8ff', accent:'#88c8e8',
+    svg:`<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="30" cy="36" rx="18" ry="14" fill="#c8e8f8" stroke="#88b8d8" stroke-width="1.2"/>
+      <ellipse cx="30" cy="28" rx="16" ry="15" fill="#c8e8f8" stroke="#88b8d8" stroke-width="1.2"/>
+      <ellipse cx="30" cy="25" rx="11" ry="9" fill="#ddf0fa"/>
+      <circle cx="25" cy="26" r="3" fill="#333"/>
+      <circle cx="35" cy="26" r="3" fill="#333"/>
+      <circle cx="25.8" cy="25.2" r="1.2" fill="white"/>
+      <circle cx="35.8" cy="25.2" r="1.2" fill="white"/>
+      <ellipse cx="30" cy="31" rx="3" ry="2" fill="#f9b8d0"/>
+      <ellipse cx="22" cy="34" rx="4" ry="2.5" fill="#a8d8f0" opacity="0.5"/>
+      <ellipse cx="38" cy="34" rx="4" ry="2.5" fill="#a8d8f0" opacity="0.5"/>
+      <path d="M24,33 Q30,37 36,33" stroke="#88b8d8" stroke-width="1.2" fill="none"/>
+    </svg>`},
+];
+const avatarList = sanrioChars.map(c=>c.id);
+let profCharId = 'kitty';
+
+const meetings=[
+  {name:'애기엄마 모임',emoji:'🌸',code:'TG-8472',
+   members:[{n:'유진',done:true},{n:'민지',done:true},{n:'지현',done:false},{n:'수아',done:true},{n:'소연',done:false}],
+   status:'scheduling'},
+  {name:'벚꽃 피크닉',emoji:null,code:'TG-3310',
+   members:[{n:'유진',done:true},{n:'소연',done:false},{n:'연주',done:false}],
+   status:'scheduling'}
+];
+
+/* ── ROUTING ── */
+function goHome(){
+  showPage('home'); closeNotif();
+}
+function goMypage(){
+  showPage('mypage'); renderMypage();
+}
+function goMeeting(i){
+  curMtg=i;
+  const m=meetings[i];
+  const emojiEl=document.getElementById('mEmojiEl');
+  emojiEl.textContent=m.emoji||'';
+  emojiEl.style.display=m.emoji?'inline':'none';
+  document.getElementById('mNameEl').textContent=m.name;
+  document.getElementById('mSubEl').textContent=`멤버 ${m.members.length}명 · 일정 조율 중`;
+  document.getElementById('mCodeEl').textContent=m.code;
+  renderMemChips(m); renderMemStatus(m);
+  renderCal(); renderTimes();
+  document.getElementById('resultSec').style.display='none';
+  swTab(0); showPage('meeting');
+}
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+}
+
+/* ── MEMBER CHIPS ── */
+function renderMemChips(m){
+  document.getElementById('memRowEl').innerHTML=m.members.map(x=>`
+    <div class="mem-chip">
+      <div class="av">${x.n[0]}</div>
+      <span>${x.n}</span>
+      ${x.done?'<span class="ck">✓</span>':'<span style="font-size:10px;color:var(--text-l)">미입력</span>'}
+    </div>`).join('');
+}
+function renderMemStatus(m){
+  const done=m.members.filter(x=>x.done).length, tot=m.members.length;
+  document.getElementById('memStatusEl').innerHTML=`
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span>일정 입력 완료</span>
+        <span style="font-family:'Jua',sans-serif;color:var(--rose-dd)">${done}/${tot}명</span>
+      </div>
+      <div class="prog"><div class="prog-fill" style="width:${done/tot*100}%"></div></div>
+    </div>
+    ${m.members.map(x=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(232,101,154,.08)">
+        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--lavender));display:flex;align-items:center;justify-content:center;font-family:'Jua',sans-serif;font-size:13px;color:var(--rose-dd)">${x.n[0]}</div>
+        <div style="flex:1">
+          <div style="font-family:'Jua',sans-serif;font-size:13px">${x.n}</div>
+          <div style="font-size:11px;color:var(--text-l)">${x.done?'입력 완료 ✅':'아직 미입력 🌸'}</div>
+        </div>
+        <span style="font-size:18px">${x.done?'💕':'○'}</span>
+      </div>`).join('')}`;
+}
+
+/* ── TABS ── */
+function swTab(i){
+  for(let j=0;j<3;j++){
+    document.getElementById('tab'+j).classList.toggle('on',j===i);
+    document.getElementById('tc'+j).style.display=j===i?'block':'none';
+  }
+}
+
+/* ── CALENDAR ── */
+function renderCal(){
+  const mos=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  document.getElementById('calMoEl').textContent=`${calY}년 ${mos[calM-1]}`;
+  const g=document.getElementById('calGrid');
+  const hds=['일','월','화','수','목','금','토'];
+  let h=hds.map((d,i)=>`<div class="dh ${i===0?'su':i===6?'sa':''}">${d}</div>`).join('');
+  const fd=new Date(calY,calM-1,1).getDay();
+  const dim=new Date(calY,calM,0).getDate();
+  const today=new Date();
+  const ts=`${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+  for(let i=0;i<fd;i++) h+=`<div class="dd emp"></div>`;
+  for(let d=1;d<=dim;d++){
+    const dow=(fd+d-1)%7;
+    const ds=`${calY}-${calM}-${d}`;
+    const past=new Date(calY,calM-1,d)<new Date(today.getFullYear(),today.getMonth(),today.getDate());
+    let c='dd';
+    if(past)c+=' past';
+    if(ds===ts)c+=' today';
+    if(selDates.has(ds))c+=' sel';
+    if(dow===0)c+=' suc'; if(dow===6)c+=' sac';
+    h+=`<div class="${c}" onclick="togDate('${ds}',${past})">${d}</div>`;
+  }
+  g.innerHTML=h;
+}
+function togDate(ds,past){if(past)return; selDates.has(ds)?selDates.delete(ds):selDates.add(ds); renderCal();}
+function chMo(d){calM+=d; if(calM>12){calM=1;calY++;} if(calM<1){calM=12;calY--;} renderCal();}
+
+/* ── TIMES ── */
+function renderTimes(){
+  const c=document.getElementById('timeSlots');
+  const ps=[{l:'🌅 오전',s:[]},{l:'☀️ 오후',s:[]},{l:'🌙 저녁',s:[]}];
+  for(let h=6;h<12;h++) for(let m=0;m<60;m+=30) ps[0].s.push(fmt(h,m));
+  for(let h=12;h<18;h++) for(let m=0;m<60;m+=30) ps[1].s.push(fmt(h,m));
+  for(let h=18;h<24;h++) for(let m=0;m<60;m+=30) ps[2].s.push(fmt(h,m));
+  c.innerHTML=ps.map(p=>`
+    <div class="t-title">${p.l}</div>
+    <div class="t-grid">${p.s.map(s=>`<button class="tbtn${selTimes.has(s)?' sel':''}" onclick="togTime('${s}')">${s}</button>`).join('')}</div>
+  `).join('');
+}
+function fmt(h,m){return `${String(h).padStart(2,'0')}:${m===0?'00':'30'}`;}
+function togTime(t){if(anytime)return; selTimes.has(t)?selTimes.delete(t):selTimes.add(t); renderTimes();}
+function togAnytime(){
+  anytime=!anytime;
+  document.getElementById('anytimeBtn').classList.toggle('on',anytime);
+  if(anytime){selTimes.clear();renderTimes();}
+}
+
+/* ── SAVE / FIND ── */
+function saveSched(){
+  if(!selDates.size&&!anytime){toast('날짜를 먼저 선택해주세요');return;}
+  meetings[curMtg].members[0].done=true;
+  renderMemChips(meetings[curMtg]); renderMemStatus(meetings[curMtg]);
+  toast('일정이 저장됐어요. 다른 멤버들도 기다려봐요!');
+}
+function findTime(){
+  const res=makeResults();
+  const sec=document.getElementById('resultSec');
+  const cards=document.getElementById('resultCards');
+  selResult=-1; document.getElementById('confBtn').style.display='none';
+  sec.style.display='block';
+  cards.innerHTML=res.map((r,i)=>`
+    <div class="rcard ${i===0?'best':'other'}" onclick="pickResult(${i})" id="rc${i}">
+      ${i===0?'<div class="best-tag">🎀 최선!</div>':''}
+      <div class="rcard-icon">${r.icon}</div>
+      <div class="rcard-info">
+        <div class="rcard-date">${r.date}</div>
+        <div class="rcard-time">${r.time}</div>
+        <div class="rcard-cnt">${r.cnt}명 모두 가능</div>
+      </div>
+      <div class="sel-circle" id="sc${i}"></div>
+    </div>`).join('');
+  sec.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function makeResults(){
+  const dw=['일','월','화','수','목','금','토'];
+  const base=new Date(2026,4,27); const res=[];
+  [[3,'11:00 - 15:00',5,'★'],[7,'18:00 - 22:00',5,'★'],[11,'14:00 - 18:00',4,'★'],[15,'11:30 - 14:30',3,'★']].forEach(([off,t,cnt,icon])=>{
+    const d=new Date(base); d.setDate(d.getDate()+off);
+    res.push({date:`${d.getMonth()+1}월 ${d.getDate()}일 (${dw[d.getDay()]})`,time:t,cnt,icon});
+  });
+  return res;
+}
+function pickResult(i){
+  document.querySelectorAll('.rcard').forEach((c,j)=>{
+    c.classList.toggle('picked',j===i);
+    document.getElementById('sc'+j).textContent=j===i?'✓':'';
+  });
+  selResult=i; document.getElementById('confBtn').style.display='flex';
+}
+function confirmMtg(){
+  if(selResult<0)return;
+  const r=makeResults()[selResult];
+  document.getElementById('confDetail').textContent=`${r.date}\n${r.time}\n\n모든 멤버에게 알림을 보냈어요.`;
+  openMov('confirmed'); spawnConfetti();
+  toast('일정 확정 알림을 모두에게 보냈어요');
+}
+
+/* ── CREATE ── */
+function createMtg(){
+  const name=document.getElementById('cName').value.trim();
+  if(!name){toast('모임 이름을 입력해주세요');return;}
+  const mems=document.getElementById('cMembers').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const newM=[{n:profName,done:true},...mems.map(n=>({n,done:false}))];
+  const code='TG-'+Math.floor(1000+Math.random()*9000);
+  meetings.push({name,emoji:selCrtEmoji||null,code,members:newM,status:'scheduling'});
+  closeMov('create');
+  toast(`"${name}" 모임이 생성됐어요. 코드: ${code}`);
+  document.getElementById('cName').value='';
+  document.getElementById('cMembers').value='';
+  setTimeout(()=>goMeeting(meetings.length-1),300);
+}
+
+/* ── JOIN CODE ── */
+function joinCode(){
+  const c=document.getElementById('joinInp').value.trim().toUpperCase();
+  if(!c){toast('참여코드를 입력해주세요');return;}
+  const f=meetings.findIndex(m=>m.code===c);
+  if(f>=0){toast(`"${meetings[f].name}"에 입장했어요`); setTimeout(()=>goMeeting(f),500);}
+  else toast('코드를 다시 확인해주세요');
+  document.getElementById('joinInp').value='';
+}
+function copyCode(){
+  const c=document.getElementById('mCodeEl').textContent;
+  navigator.clipboard.writeText(c).catch(()=>{});
+  toast(`코드가 복사됐어요: ${c}`);
+}
+
+/* ── MYPAGE ── */
+function getCharById(id){ return sanrioChars.find(c=>c.id===id)||sanrioChars[0]; }
+function renderMypage(){
+  const ch=getCharById(profCharId);
+  document.getElementById('profEmoji').innerHTML=ch.svg;
+  const cont=document.getElementById('avOpts'); cont.innerHTML='';
+  sanrioChars.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='char-opt'+(c.id===profCharId?' on':'');
+    b.style.background=c.id===profCharId?c.color:'rgba(255,248,253,.8)';
+    b.innerHTML=`<div class="char-svg">${c.svg}</div><div class="char-name">${c.name}</div>`;
+    b.onclick=()=>{
+      profCharId=c.id;
+      document.getElementById('profEmoji').innerHTML=c.svg;
+      document.querySelectorAll('.char-opt').forEach(x=>{x.classList.remove('on');x.style.background='rgba(255,248,253,.8)';});
+      b.classList.add('on'); b.style.background=c.color;
+      toast('캐릭터 변경: '+c.name);
+    };
+    cont.appendChild(b);
+  });
+}
+function changeName(){
+  const v=document.getElementById('nickInp').value.trim();
+  if(!v){toast('닉네임을 입력해주세요');return;}
+  profName=v;
+  document.getElementById('profName').textContent=v;
+  toast(`닉네임이 "${v}"(으)로 변경됐어요`);
+  document.getElementById('nickInp').value='';
+}
+function scrollToAv(){document.getElementById('avOpts').scrollIntoView({behavior:'smooth'});}
+
+/* ── NOTIF ── */
+function toggleNotif(){
+  notifOpen=!notifOpen;
+  document.getElementById('npanel').classList.toggle('open',notifOpen);
+  if(notifOpen) document.getElementById('nbadge').style.display='none';
+}
+function closeNotif(){notifOpen=false; document.getElementById('npanel').classList.remove('open');}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.npanel')&&!e.target.closest('#nBtn')) closeNotif();
+});
+
+/* ── CHAT ── */
+function sendChat(){
+  const i=document.getElementById('chatInp'), msg=i.value.trim();
+  if(!msg)return;
+  const w=document.getElementById('chatWrap');
+  const d=document.createElement('div'); d.className='cmsg mine';
+  d.innerHTML=`<div class="cav">${profEmoji}</div><div><div class="cwho">나</div><div class="cbubble">${msg}</div></div>`;
+  w.appendChild(d); w.scrollTop=w.scrollHeight; i.value='';
+}
+
+/* ── MODAL ── */
+function openMov(id){
+  document.getElementById('mov-'+id).classList.add('open');
+  if(id==='create') initCrtEmoji();
+}
+function closeMov(id){document.getElementById('mov-'+id).classList.remove('open');}
+function movOut(e,id){if(e.target.id==='mov-'+id) closeMov(id);}
+function initCrtEmoji(){
+  const emojis=['🌸','🌷','🌼','🌺','☕','🎂','✨','🎀','💕','🍓','🌙','🎵','🌊','🎨','🎉'];
+  const p=document.getElementById('cEmojiPick'); p.innerHTML='';
+  /* '없음' 버튼 */
+  const none=document.createElement('button');
+  none.className='eo'+(selCrtEmoji===null?' on':'');
+  none.textContent='없음';
+  none.style.fontSize='11px';none.style.width='46px';none.style.borderRadius='8px';
+  none.onclick=()=>{selCrtEmoji=null; document.querySelectorAll('#cEmojiPick .eo').forEach(x=>x.classList.remove('on')); none.classList.add('on');};
+  p.appendChild(none);
+  emojis.forEach(e=>{
+    const b=document.createElement('button');
+    b.className='eo'+(e===selCrtEmoji?' on':'');
+    b.textContent=e;
+    b.onclick=()=>{
+      selCrtEmoji= selCrtEmoji===e ? null : e;
+      document.querySelectorAll('#cEmojiPick .eo').forEach(x=>x.classList.remove('on'));
+      if(selCrtEmoji) b.classList.add('on'); else none.classList.add('on');
+    };
+    p.appendChild(b);
+  });
+}
+
+/* ── TOAST ── */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ── CONFETTI ── */
+function spawnConfetti(){
+  ['✦','✧','·','✦','✧','·','✦','✧'].forEach((e,i)=>{
+    const el=document.createElement('div');
+    el.className='confetti'; el.textContent=e;
+    el.style.cssText=`left:${Math.random()*100}vw;bottom:60px;font-size:${16+Math.random()*12}px;color:${['#f499bb','#c89fe8','#85ccf0','#e8659a'][i%4]};animation:fly ${1+Math.random()*1.3}s ease-out ${i*.08}s forwards`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),3000);
+  });
+}
+
+/* ── INIT ── */
+renderCal(); renderTimes(); renderMypage();
+document.getElementById('profEmoji').innerHTML = getCharById(profCharId).svg;
+</script>
+</body>
+</html>
