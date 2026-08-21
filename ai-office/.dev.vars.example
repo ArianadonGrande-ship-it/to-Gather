@@ -4,7 +4,7 @@
 #
 # ⚠️ 여기 값을 하나도 안 채워도 오피스는 정상 작동합니다.
 #    (연동 항목만 화면에 "미설정"으로 표시됩니다)
-#    나중에 진짜 Notion·Discord에 보고서를 보내고 싶을 때만 채우세요.
+#    나중에 진짜 Notion·Slack에 보고서를 보내고 싶을 때만 채우세요.
 
 # ── Notion ─────────────────────────────────────────────
 # 1) https://www.notion.so/my-integrations 에서 내부 통합 생성 → Secret 복사 (ntn_ 로 시작)
@@ -14,6 +14,8 @@ NOTION_TOKEN=
 # 보고서를 저장할 데이터베이스 ID (Notion DB 주소의 32자리 문자열)
 NOTION_BRIEFING_DB=
 
-# ── Discord ────────────────────────────────────────────
-# 보고를 받을 채널 → 채널 편집 → 연동 → 웹후크 → 새 웹후크 → URL 복사
-DISCORD_WEBHOOK_URL=
+# ── Slack ──────────────────────────────────────────────
+# 1) https://api.slack.com/apps 에서 앱 생성 (또는 기존 앱 사용)
+# 2) 왼쪽 메뉴 "Incoming Webhooks" 켜기 → "Add New Webhook to Workspace"
+# 3) 보고를 받을 채널 선택 → 생성된 Webhook URL 복사 (https://hooks.slack.com/services/... 형태)
+SLACK_WEBHOOK_URL=

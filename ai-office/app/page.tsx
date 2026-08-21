@@ -116,14 +116,14 @@ export default function Home() {
 
         const parts: string[] = [];
         parts.push(result.notion.ok ? "Notion 저장 완료" : `Notion ${result.notion.detail ?? "실패"}`);
-        parts.push(result.discord.ok ? "Discord 전송 완료" : `Discord ${result.discord.detail ?? "실패"}`);
+        parts.push(result.slack.ok ? "Slack 전송 완료" : `Slack ${result.slack.detail ?? "실패"}`);
         engine.pushLog(
-          result.notion.ok && result.discord.ok ? "📤" : "⚠️",
+          result.notion.ok && result.slack.ok ? "📤" : "⚠️",
           `완료 보고 발행 — ${parts.join(" / ")}`,
-          result.notion.ok && result.discord.ok ? "mint" : "lav",
+          result.notion.ok && result.slack.ok ? "mint" : "lav",
         );
         engine.pushChat("staff", "켈리", `보고서 발행 결과입니다.\n· ${parts.join("\n· ")}`);
-        if (!auto) showToast(result.notion.ok || result.discord.ok ? "보고서를 발행했어요" : "발행 실패 — 연동 설정 필요");
+        if (!auto) showToast(result.notion.ok || result.slack.ok ? "보고서를 발행했어요" : "발행 실패 — 연동 설정 필요");
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         setPublishState({ busy: false, result: null, error: message });
@@ -341,10 +341,10 @@ function LiveView({
           🎥 자동 추적 {follow ? "ON" : "OFF"}
         </button>
         <button
-          className={`btn btn-ghost publish-btn ${publishResult?.notion.ok || publishResult?.discord.ok ? "sent" : ""}`}
+          className={`btn btn-ghost publish-btn ${publishResult?.notion.ok || publishResult?.slack.ok ? "sent" : ""}`}
           onClick={onPublish}
           disabled={publishBusy}
-          title="완료 보고를 Notion에 저장하고 같은 내용을 Discord로 보냅니다"
+          title="완료 보고를 Notion에 저장하고 같은 내용을 Slack으로 보냅니다"
         >
           {publishBusy ? "발행 중…" : "📤 보고 발행"}
         </button>
@@ -672,7 +672,7 @@ function BriefingModal({ snap, onClose }: { snap: Snapshot; onClose: () => void 
         aria-label="켈리 브리핑"
       >
         <div className="win-bar">
-          <span>📋 kim_secretary.brief</span>
+          <span>📋 kelly_secretary.brief</span>
           <button className="window-close" onClick={onClose}>
             ✕
           </button>
@@ -755,13 +755,13 @@ function DashboardView({
           href: "",
         },
         {
-          name: "Discord 전송",
-          status: publishResult?.discord.ok
+          name: "Slack 전송",
+          status: publishResult?.slack.ok
             ? "전송 성공"
-            : integrations.discord?.configured
+            : integrations.slack?.configured
               ? "웹훅 설정됨"
               : "웹훅 미설정",
-          tone: publishResult?.discord.ok ? "mint" : integrations.discord?.configured ? "yellow" : "lav",
+          tone: publishResult?.slack.ok ? "mint" : integrations.slack?.configured ? "yellow" : "lav",
           href: "",
         },
         { name: "Instagram", status: integrations.instagram?.need ?? "연동 대기", tone: "lav", href: "" },
@@ -800,7 +800,7 @@ function DashboardView({
       <section className="summary-grid" aria-label="오늘 업무 요약">
         <article className="metric yellow">
           <span>AI 직원</span>
-          <strong>32</strong>
+          <strong>{STAFF.length}</strong>
           <small>STAFF</small>
         </article>
         <article className="metric mint">
@@ -943,7 +943,7 @@ function DashboardView({
 
             <section className="win secretary">
               <div className="win-bar">
-                <span>📋 kim_secretary.brief</span>
+                <span>📋 kelly_secretary.brief</span>
                 <span className="window-controls">—　▢　✕</span>
               </div>
               <div className="win-body">
