@@ -35,7 +35,7 @@ const worker = {
       return Response.json(integrationStatus(env));
     }
 
-    // 완료 보고를 Notion + Discord로 동시 발행
+    // 완료 보고를 Notion + Slack으로 동시 발행
     if (url.pathname === "/api/report") {
       if (request.method !== "POST") return new Response("POST only", { status: 405 });
       try {

@@ -18,7 +18,7 @@ export type DayReport = {
 
 export type PublishResult = {
   notion: { ok: boolean; status: string; detail?: string; url?: string };
-  discord: { ok: boolean; status: string; detail?: string };
+  slack: { ok: boolean; status: string; detail?: string };
   publishedAt: string;
 };
 
