@@ -189,9 +189,36 @@ a.integration-row:hover { border-color: var(--pink-deep); }
 .approval-body > p { margin: 0; color: var(--ink-soft); font-size: 12px; line-height: 1.75; }
 .approval-top { display: flex; align-items: center; justify-content: space-between; }
 .score { color: var(--pink-deep); font: 900 22px "Archivo", sans-serif; }
-.reason-list { display: grid; gap: 6px; margin: 14px 0; padding: 11px; border: 1.5px dashed var(--pink-line); border-radius: 9px; background: #fffafd; font-size: 11px; font-weight: 700; }
-.approve-button { width: 100%; background: var(--yellow); }
+.approve-button { background: var(--yellow); }
 .approve-button.approved { background: var(--mint); }
+.approval-note { margin: 6px 0 0; padding: 7px 10px; border-radius: 9px; background: #fff3b0; font-size: 11px; font-weight: 700; }
+.approval-preview { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.approval-preview > div { padding: 10px; border: 1.5px dashed var(--pink-line); border-radius: 9px; background: #fffafd; }
+.approval-preview p { margin: 4px 0 0; font-size: 11px; line-height: 1.6; color: var(--ink-soft); }
+.approval-preview p b { color: var(--ink); margin-right: 4px; }
+.approval-actions { display: flex; gap: 8px; margin-top: 4px; }
+.approval-actions .approve-button { flex: 1; }
+.approval-confirm { margin-top: 10px; padding: 10px; border: 1.5px dashed var(--pink-deep); border-radius: 9px; background: #fff0f6; display: grid; gap: 6px; }
+.approval-confirm p { margin: 0; font-size: 12px; }
+.approval-feedback { display: flex; gap: 6px; margin-top: 10px; }
+.approval-feedback input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 9px;
+  font-size: 12px;
+}
+.approval-feedback button {
+  padding: 8px 12px;
+  border: 1.5px solid var(--ink);
+  border-radius: 9px;
+  background: var(--lav);
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.result-empty { margin: 0; padding: 18px 12px; text-align: center; color: var(--ink-soft); font-size: 12px; }
 .brief-date { margin: 0; color: var(--pink-deep); font: 900 10px "Archivo", "Noto Sans KR", sans-serif; }
 .secretary ul { display: grid; gap: 9px; margin: 13px 0; padding: 0; list-style: none; }
 .secretary li { display: flex; align-items: center; gap: 8px; color: var(--ink-soft); font-size: 11px; }

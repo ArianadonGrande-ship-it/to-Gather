@@ -52,6 +52,126 @@ function PixelEmployee({ hair, shirt, accent }: { hair: string; shirt: string; a
   );
 }
 
+/** 대표 승인 카드 — 콘텐츠·상품 미리보기 + 승인/수정 요청/폐기 (사규 §대표 승인 4가지 선택지 중 3가지) */
+function ApprovalPanel({
+  snap,
+  onApprove,
+  onRevise,
+  onDiscard,
+}: {
+  snap: Snapshot;
+  onApprove: () => void;
+  onRevise: (feedback: string) => void;
+  onDiscard: () => void;
+}) {
+  const [feedback, setFeedback] = useState("");
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const item = snap.approvalItem;
+  const itemKey = item ? `${item.content.title}·${item.note ?? ""}` : "";
+
+  useEffect(() => {
+    setFeedback("");
+    setConfirmDiscard(false);
+  }, [itemKey]);
+
+  if (!snap.approvalPending || !item) {
+    return (
+      <div className="win-body approval-body">
+        <div className="approval-top">
+          <span className="mini-badge mint">{snap.approved ? "오늘 결재 완료" : "결재 대기 없음"}</span>
+        </div>
+        <h3>{snap.approved ? "승인하신 안으로 제작 중이에요" : "아직 올라온 안건이 없어요"}</h3>
+        <p>
+          {snap.approved
+            ? "대표 승인 이후 대본·상품기획 → 제작 → 정산까지 이어집니다."
+            : "업무를 시작하면 기획 1팀이 콘텐츠·상품 TOP 3를 회의실로 올려요."}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="win-body approval-body pending">
+      <div className="approval-top">
+        <span className="mini-badge yellow">콘텐츠 TOP 1 + 상품 TOP 1</span>
+        <span className="score blink">결재 대기</span>
+      </div>
+      <h3>
+        {item.content.title}
+        <br />+ {item.product.name}
+      </h3>
+      {item.note ? <p className="approval-note">💬 반영 중인 피드백: {item.note}</p> : null}
+      <div className="approval-preview">
+        <div>
+          <span className="tiny-label">콘텐츠</span>
+          <p>
+            <b>훅</b> {item.content.hook}
+          </p>
+          <p>
+            <b>근거</b> {item.content.reason}
+          </p>
+          <p>
+            <b>타깃</b> {item.content.target}
+          </p>
+        </div>
+        <div>
+          <span className="tiny-label">상품</span>
+          <p>
+            <b>스펙</b> {item.product.spec}
+          </p>
+          <p>
+            <b>가격</b> {item.product.price}
+          </p>
+        </div>
+      </div>
+
+      <div className="approval-actions">
+        <button className="btn approve-button" onClick={onApprove}>
+          승인
+        </button>
+        <button className="btn btn-ghost" onClick={() => setConfirmDiscard((v) => !v)}>
+          폐기
+        </button>
+      </div>
+
+      {confirmDiscard ? (
+        <div className="approval-confirm">
+          <p>정말 폐기하고 다른 콘텐츠·상품으로 다시 받을까요?</p>
+          <button
+            className="btn btn-ghost"
+            onClick={() => {
+              onDiscard();
+              setConfirmDiscard(false);
+            }}
+          >
+            네, 폐기할게요
+          </button>
+          <button className="text-button" onClick={() => setConfirmDiscard(false)}>
+            취소
+          </button>
+        </div>
+      ) : null}
+
+      <form
+        className="approval-feedback"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (!feedback.trim()) return;
+          onRevise(feedback);
+        }}
+      >
+        <input
+          value={feedback}
+          onChange={(event) => setFeedback(event.target.value)}
+          placeholder="수정 요청할 내용을 적어주세요 (예: 상품 가격 낮춰줘)"
+          aria-label="수정 요청 내용"
+        />
+        <button type="submit">수정 요청</button>
+      </form>
+    </div>
+  );
+}
+
 export default function Home() {
   const [engine] = useState(() => new Company());
   const [snap, setSnap] = useState<Snapshot>(() => engine.snapshot());
@@ -155,6 +275,16 @@ export default function Home() {
     showToast("승인 완료! 제작팀이 바로 움직여요");
   };
 
+  const revise = (feedback: string) => {
+    engine.requestRevision(feedback);
+    showToast("피드백 반영해서 다시 준비할게요");
+  };
+
+  const discard = () => {
+    engine.discardItem();
+    showToast("새 콘텐츠·상품으로 다시 준비할게요");
+  };
+
   const teams = useMemo(
     () =>
       DEPT_ROOMS.map((room) => {
@@ -218,6 +348,8 @@ export default function Home() {
             onSelect={onSelect}
             onStart={start}
             onApprove={approve}
+            onRevise={revise}
+            onDiscard={discard}
             onDuty={onDuty}
             onPublish={() => void sendReport(false)}
             publishBusy={publishState.busy}
@@ -232,6 +364,8 @@ export default function Home() {
             snap={snap}
             onStart={start}
             onApprove={approve}
+            onRevise={revise}
+            onDiscard={discard}
             onSelect={(id) => setSelectedId(id)}
             integrations={integrations}
             publishResult={publishState.result}
@@ -268,6 +402,8 @@ function LiveView({
   onSelect,
   onStart,
   onApprove,
+  onRevise,
+  onDiscard,
   onDuty,
   onPublish,
   publishBusy,
@@ -281,6 +417,8 @@ function LiveView({
   onSelect: (agent: Agent) => void;
   onStart: () => void;
   onApprove: () => void;
+  onRevise: (feedback: string) => void;
+  onDiscard: () => void;
   onDuty: number;
   onPublish: () => void;
   publishBusy: boolean;
@@ -375,38 +513,7 @@ function LiveView({
               <span>✅ ceo.approval</span>
               <span className="window-controls">—　▢　✕</span>
             </div>
-            <div className={`win-body approval-body ${snap.approvalPending ? "pending" : ""}`}>
-              {snap.approvalPending ? (
-                <>
-                  <div className="approval-top">
-                    <span className="mini-badge yellow">콘텐츠 TOP 1 + 상품 TOP 1</span>
-                    <span className="score blink">결재 대기</span>
-                  </div>
-                  <h3>요즘 유행 비즈스트랩 언박싱 + 신규 카스티커 세트</h3>
-                  <p>회의실에서 코코·렌·켈리가 대표님을 기다리고 있어요.</p>
-                  <div className="reason-list">
-                    <span>① 콘텐츠 각도·근거</span>
-                    <span>② 상품 스펙·가격안</span>
-                    <span>③ 브랜드검수 통과 여부</span>
-                  </div>
-                  <button className="btn approve-button" onClick={onApprove}>
-                    콘텐츠·상품 승인하기
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="approval-top">
-                    <span className="mini-badge mint">{snap.approved ? "오늘 결재 완료" : "결재 대기 없음"}</span>
-                  </div>
-                  <h3>{snap.approved ? "승인하신 안으로 제작 중이에요" : "아직 올라온 안건이 없어요"}</h3>
-                  <p>
-                    {snap.approved
-                      ? "대표 승인 이후 대본·상품기획 → 제작 → 정산까지 이어집니다."
-                      : "업무를 시작하면 기획 1팀이 콘텐츠·상품 TOP 3를 회의실로 올려요."}
-                  </p>
-                </>
-              )}
-            </div>
+            <ApprovalPanel snap={snap} onApprove={onApprove} onRevise={onRevise} onDiscard={onDiscard} />
           </section>
 
           <section className="win rail-card feed-card">
@@ -726,6 +833,8 @@ function DashboardView({
   snap,
   onStart,
   onApprove,
+  onRevise,
+  onDiscard,
   onSelect,
   integrations,
   publishResult,
@@ -737,10 +846,25 @@ function DashboardView({
   snap: Snapshot;
   onStart: () => void;
   onApprove: () => void;
+  onRevise: (feedback: string) => void;
+  onDiscard: () => void;
   onSelect: (id: string) => void;
   integrations: IntegrationStatus | null;
   publishResult: PublishResult | null;
 }) {
+  // 오늘 실제로 완료된 산출물만 보여준다 (예시 더미 데이터 없음)
+  const resultRows = useMemo(
+    () =>
+      snap.log
+        .filter((entry) => entry.text.includes(" 완료 — "))
+        .map((entry) => {
+          const [team, output] = entry.text.split(" 완료 — ");
+          return { time: entry.time, team, output };
+        })
+        .reverse(),
+    [snap.log],
+  );
+
   // 서버가 알려준 실제 설정 상태로 표시한다 (연결됐다고 거짓 보고하지 않는다)
   const liveRows = integrations
     ? [
@@ -922,23 +1046,7 @@ function DashboardView({
                 <span>✅ ceo.approval</span>
                 <span className="window-controls">—　▢　✕</span>
               </div>
-              <div className="win-body approval-body">
-                <div className="approval-top">
-                  <span className="mini-badge yellow">콘텐츠 TOP 1 + 상품 TOP 1</span>
-                </div>
-                <h3>
-                  요즘 유행 비즈스트랩 언박싱
-                  <br />+ 신규 카스티커 세트
-                </h3>
-                <p>브랜드검수까지 통과한 오늘의 콘텐츠 1개 · 상품 1개를 대표님이 확인하고 계세요.</p>
-                <button
-                  className={`btn approve-button ${snap.approved ? "approved" : ""}`}
-                  onClick={onApprove}
-                  disabled={!snap.approvalPending}
-                >
-                  {snap.approved ? "승인 완료 · 제작팀 전달됨" : snap.approvalPending ? "이 콘텐츠 승인하기" : "대기 중인 안건 없음"}
-                </button>
-              </div>
+              <ApprovalPanel snap={snap} onApprove={onApprove} onRevise={onRevise} onDiscard={onDiscard} />
             </section>
 
             <section className="win secretary">
@@ -1001,20 +1109,20 @@ function DashboardView({
               <span>결과물</span>
               <span>담당팀</span>
               <span>상태</span>
-              <span>바로가기</span>
+              <span>시각</span>
             </div>
-            <div className="result-row">
-              <b>이번 주 콘텐츠 캘린더 정리</b>
-              <span>기획 1팀</span>
-              <span className="status-pill done">최종 완료</span>
-              <span>—</span>
-            </div>
-            <div className="result-row">
-              <b>브랜드 템플릿 세팅</b>
-              <span>이미지 제작팀</span>
-              <span className="status-pill done">최종 완료</span>
-              <span>—</span>
-            </div>
+            {resultRows.length === 0 ? (
+              <p className="result-empty">아직 완료된 산출물이 없어요. 오늘 업무를 시작하면 여기 쌓여요.</p>
+            ) : (
+              resultRows.map((row, i) => (
+                <div className="result-row" key={i}>
+                  <b>{row.output}</b>
+                  <span>{row.team}</span>
+                  <span className="status-pill done">최종 완료</span>
+                  <span>{row.time}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
