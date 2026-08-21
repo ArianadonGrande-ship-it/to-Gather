@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&family=Noto+Serif+KR:wght@600;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&family=Jua&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -185,7 +185,7 @@ a.integration-row:hover { border-color: var(--pink-deep); }
 .status-dot.waiting { background: #ddd0d7; }
 
 .two-col { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: 18px; }
-.approval-body h3, .secretary h3 { margin: 12px 0 8px; font-family: "Noto Serif KR", serif; font-size: 20px; line-height: 1.45; }
+.approval-body h3, .secretary h3 { margin: 12px 0 8px; font-family: "Jua", "Noto Sans KR", sans-serif; font-size: 20px; line-height: 1.45; }
 .approval-body > p { margin: 0; color: var(--ink-soft); font-size: 12px; line-height: 1.75; }
 .approval-top { display: flex; align-items: center; justify-content: space-between; }
 .score { color: var(--pink-deep); font: 900 22px "Archivo", sans-serif; }
