@@ -102,6 +102,41 @@ type Slot = {
   until: (() => boolean) | null;
 };
 
+export type ContentBrief = { title: string; hook: string; reason: string; target: string };
+export type ProductBrief = { name: string; spec: string; price: string };
+export type ApprovalItem = { content: ContentBrief; product: ProductBrief; note?: string };
+
+/** 승인 대기 중인 콘텐츠·상품 후보 — 폐기하면 다음 후보로 넘어간다 */
+const BRIEF_POOL: { content: ContentBrief; product: ProductBrief }[] = [
+  {
+    content: {
+      title: "요즘 유행 비즈스트랩 언박싱",
+      hook: "이거 안 사면 다음 주엔 품절이에요",
+      reason: "최근 7일 저장률 1위 포맷 + 공식 트렌드 확인 완료",
+      target: "20대 후반 여성",
+    },
+    product: { name: "신규 카스티커 세트", spec: "5매입 · 방수 코팅 · 3color", price: "9,900원" },
+  },
+  {
+    content: {
+      title: "책상 꾸미기 브이로그 with 비즈스트랩",
+      hook: "이 색조합 그대로 따라해도 돼요",
+      reason: "경쟁 콘텐츠 대비 저장 각도 차별화, 브랜드분석팀 확인",
+      target: "20대 여성 · 데스크테리어",
+    },
+    product: { name: "파스텔 비즈 팔찌 3종 세트", spec: "논알러지 소재 · 사이즈 조절 가능", price: "12,900원" },
+  },
+  {
+    content: {
+      title: "친구한테 만들어준 커스텀 카스티커",
+      hook: "선물로 하나쯤은 있어야 하는 이유",
+      reason: "협업소통팀 제휴 제안과 시너지 가능",
+      target: "20대 여성 · 선물용",
+    },
+    product: { name: "커스텀 각인 카스티커", spec: "이니셜 각인 · 주문제작 3일 소요", price: "14,900원" },
+  },
+];
+
 export type Snapshot = {
   clock: string;
   running: boolean;
@@ -112,6 +147,7 @@ export type Snapshot = {
   phase: string;
   phaseIndex: number;
   approvalPending: boolean;
+  approvalItem: ApprovalItem | null;
   approved: boolean;
   briefingReady: boolean;
   deptStatus: Record<string, DeptStatus>;
@@ -184,6 +220,7 @@ export class Company {
   dayComplete = false;
   phaseIndex = 0;
   approvalPending = false;
+  approvalItem: ApprovalItem | null = null;
   approved = false;
   briefingReady = false;
   meetingTitle: string | null = null;
@@ -197,6 +234,10 @@ export class Company {
   private elapsed = 0;
   private approvalSince: number | null = null;
   private logSeq = 0;
+  /** 대표 승인 흐름: 승인 / 수정 요청 / 폐기 결정 */
+  private decision: "approved" | "revise" | "discard" | null = null;
+  private pendingFeedback = "";
+  private briefIndex = 0;
   /** 하루 시나리오(main)와 대표 지시로 끼어드는 장면(side)을 각각 돌린다 */
   private main: Slot = { gen: null, wait: 0, until: null };
   private side: Slot = { gen: null, wait: 0, until: null };
@@ -220,8 +261,12 @@ export class Company {
     this.dayComplete = false;
     this.phaseIndex = 0;
     this.approvalPending = false;
+    this.approvalItem = null;
     this.approved = false;
     this.briefingReady = false;
+    this.decision = null;
+    this.pendingFeedback = "";
+    this.briefIndex = 0;
     this.meetingTitle = null;
     this.main = { gen: null, wait: 0, until: null };
     this.side = { gen: null, wait: 0, until: null };
@@ -422,13 +467,12 @@ export class Company {
     yield 1.8;
     this.sitAtDesk(coco);
 
-    // ⑧ 대표 승인 회의 — 콘텐츠 1개 + 상품 1개
+    // ⑧ 대표 승인 회의 — 콘텐츠 1개 + 상품 1개 (승인 / 수정 요청 / 폐기 반복 가능)
     this.phaseIndex = 7;
     this.deptStatus.strategy2 = "승인 대기";
-    this.approvalPending = true;
     this.turbo = false; // 대표 결정 지점에서는 즉시 정상 속도로 돌아온다
-    this.meetingTitle = "콘텐츠·상품 TOP 3 대표 승인";
-    this.pushLog("📋", "대표 승인 대기: 콘텐츠 1개 + 상품 1개, 오늘 결정할 안건이 회의실에 올라왔어요.", "yellow");
+    this.briefIndex = 0;
+    this.approvalItem = { ...BRIEF_POOL[this.briefIndex] };
 
     const approvers = ["strategy1-lead", "strategy2-lead", "secretary-lead"].map((id) => this.agentById.get(id)!);
     const ceo = this.agentById.get("ceo")!;
@@ -450,21 +494,47 @@ export class Company {
     );
     yield this.allFree([...approvers, ceo]);
 
-    this.say(approvers[0], "콘텐츠 TOP 1은 '요즘 유행 비즈스트랩 언박싱'이에요.", 3.4);
-    yield 2.4;
-    this.say(approvers[1], "상품 TOP 1은 신규 카스티커 세트, 스펙까지 잡아뒀어요.", 3.2);
-    yield 2.4;
-    this.say(approvers[2], "대표님, 오늘 결정하실 건 이거 두 개예요.", 3.2);
-    yield 2.2;
-    this.say(ceo, "확인해볼게요.", 2.4);
+    let finalDecision = false;
+    while (!finalDecision) {
+      const item: ApprovalItem = this.approvalItem!;
+      this.approvalPending = true;
+      this.decision = null;
+      this.meetingTitle = "콘텐츠·상품 TOP 3 대표 승인";
+      this.pushLog("📋", `대표 승인 대기: '${item.content.title}' + '${item.product.name}'`, "yellow");
 
-    // 대표가 승인 버튼을 누를 때까지 대기
-    yield () => this.approved;
+      this.say(approvers[0], `콘텐츠는 '${item.content.title}'예요.`, 3.4);
+      yield 2.4;
+      this.say(approvers[1], `상품은 ${item.product.name}, ${item.product.price}이에요.`, 3.2);
+      yield 2.4;
+      this.say(approvers[2], "대표님, 확인 부탁드려요.", 3.2);
+      yield 2.2;
+      this.say(ceo, "확인해볼게요.", 2.4);
+
+      // 대표가 승인 / 수정 요청 / 폐기 중 하나를 고를 때까지 대기
+      yield () => this.decision !== null;
+
+      if (this.decision === "approved") {
+        finalDecision = true;
+      } else if (this.decision === "discard") {
+        this.briefIndex = (this.briefIndex + 1) % BRIEF_POOL.length;
+        this.approvalItem = { ...BRIEF_POOL[this.briefIndex] };
+        this.say(approvers[0], "네, 완전히 새 각도로 다시 가져올게요.", 2.8);
+        this.pushLog("🗑️", "대표 폐기 — 기획 1팀이 다른 콘텐츠·상품으로 재준비", "lav");
+        yield 3;
+      } else if (this.decision === "revise") {
+        const note = this.pendingFeedback || "디테일 다듬기";
+        this.approvalItem = { ...item, note };
+        this.say(approvers[0], "말씀하신 대로 다듬어서 다시 가져올게요.", 2.8);
+        this.pushLog("✏️", `대표 수정 요청 — "${note}" 반영 중`, "lav");
+        yield 3;
+      }
+    }
 
     this.approvalPending = false;
+    this.approved = true;
     this.meetingTitle = null;
     this.say(ceo, "승인! 이대로 갑시다.", 2.8);
-    this.pushLog("✅", "대표 승인 완료 — 콘텐츠·상품 제작을 시작합니다.", "mint");
+    this.pushLog("✅", `대표 승인 완료 — ${this.approvalItem!.content.title} 제작을 시작합니다.`, "mint");
     yield 1.6;
     for (const agent of approvers) {
       this.releaseSeat(agent);
@@ -1031,7 +1101,20 @@ export class Company {
   // ── 대표 액션 ────────────────────────────────────────────
   approve() {
     if (!this.approvalPending) return;
-    this.approved = true;
+    this.decision = "approved";
+  }
+
+  /** 사규 승인 선택지 — 수정 요청: 피드백을 남기고 같은 안을 다듬어 다시 받는다 */
+  requestRevision(feedback: string) {
+    if (!this.approvalPending) return;
+    this.pendingFeedback = feedback.trim();
+    this.decision = "revise";
+  }
+
+  /** 사규 승인 선택지 — 폐기: 이 안은 버리고 다른 콘텐츠·상품으로 다시 받는다 */
+  discardItem() {
+    if (!this.approvalPending) return;
+    this.decision = "discard";
   }
 
   setBriefingHandler(handler: (() => void) | null) {
@@ -1283,6 +1366,7 @@ export class Company {
         this.phaseIndex === 7 && this.approved ? "승인 완료 · 자리 복귀" : PHASES[this.phaseIndex] ?? "",
       phaseIndex: this.phaseIndex,
       approvalPending: this.approvalPending,
+      approvalItem: this.approvalItem,
       approved: this.approved,
       briefingReady: this.briefingReady,
       deptStatus: { ...this.deptStatus },
