@@ -51,11 +51,19 @@ function deptRoom(index: number): Room {
   const meta = DEPT_LAYOUT[index];
   const x = COL_X[index % 4];
   const y = ROW_Y[Math.floor(index / 4)];
-  const desks: Desk[] = [3, 7, 11].map((dx) => ({
-    deskX: x + dx - 1,
-    deskY: y + 5,
-    seat: { x: x + dx, y: y + 6 },
-  }));
+  // 책상 5자리(신입 대비 여유분) — 위 3자리 + 아래 2자리, 두 줄로 배치
+  const desks: Desk[] = [
+    ...[3, 7, 11].map((dx) => ({
+      deskX: x + dx - 1,
+      deskY: y + 3,
+      seat: { x: x + dx, y: y + 4 },
+    })),
+    ...[3, 7].map((dx) => ({
+      deskX: x + dx - 1,
+      deskY: y + 7,
+      seat: { x: x + dx, y: y + 8 },
+    })),
+  ];
   return {
     ...meta,
     kind: "dept",
@@ -69,9 +77,9 @@ function deptRoom(index: number): Room {
     ],
     desks,
     loiter: [
-      { x: x + 1, y: y + 8 },
-      { x: x + 5, y: y + 8 },
-      { x: x + 9, y: y + 8 },
+      { x: x + 1, y: y + 5 },
+      { x: x + 13, y: y + 5 },
+      { x: x + 11, y: y + 8 },
       { x: x + 13, y: y + 3 },
     ],
   };

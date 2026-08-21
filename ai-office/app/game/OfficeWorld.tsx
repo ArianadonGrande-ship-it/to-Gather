@@ -76,7 +76,7 @@ const AgentLayer = memo(function AgentLayer({
             <i className="p-hair" />
           </span>
           <span className="ag-tag">
-            {agent.name}
+            {agent.rank === "ceo" ? agent.name : agent.callsign ?? agent.name}
             {agent.rank === "lead" ? <em>팀장</em> : null}
             {agent.rank === "ceo" ? <em>대표</em> : null}
           </span>

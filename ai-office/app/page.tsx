@@ -159,7 +159,7 @@ export default function Home() {
     engine.start();
     setBriefing(false);
     setView("live");
-    showToast("07:00 — AI 직원 32명이 출근합니다 ✨");
+    showToast(`10:00 — AI 직원 ${STAFF.length}명이 출근합니다 ✨`);
   };
 
   const approve = () => {
@@ -311,7 +311,7 @@ function LiveView({
     <>
       <header className="live-hero">
         <div>
-          <p className="eyebrow">LIVE OFFICE · 32 AI STAFF · REAL-TIME</p>
+          <p className="eyebrow">LIVE OFFICE · {STAFF.length} AI STAFF · REAL-TIME</p>
           <h1>
             {COMPANY.titlePrefix} <em className="highlight">{COMPANY.titleAccent}</em>
           </h1>
@@ -398,18 +398,18 @@ function LiveView({
               {snap.approvalPending ? (
                 <>
                   <div className="approval-top">
-                    <span className="mini-badge yellow">TOP 1 제안 · 92점</span>
+                    <span className="mini-badge yellow">콘텐츠 TOP 1 + 상품 TOP 1</span>
                     <span className="score blink">결재 대기</span>
                   </div>
-                  <h3>AI 회사가 매일 아침 나 대신 출근한다면?</h3>
-                  <p>회의실에서 최아름·한도빈·김세리가 대표님을 기다리고 있어요.</p>
+                  <h3>요즘 유행 비즈스트랩 언박싱 + 신규 카스티커 세트</h3>
+                  <p>회의실에서 코코·렌·켈리가 대표님을 기다리고 있어요.</p>
                   <div className="reason-list">
-                    <span>① 실제 구축 과정</span>
-                    <span>② 저장할 운영 구조</span>
-                    <span>③ 날것의 시행착오</span>
+                    <span>① 콘텐츠 각도·근거</span>
+                    <span>② 상품 스펙·가격안</span>
+                    <span>③ 브랜드검수 통과 여부</span>
                   </div>
                   <button className="btn approve-button" onClick={onApprove}>
-                    이 콘텐츠 승인하기
+                    콘텐츠·상품 승인하기
                   </button>
                 </>
               ) : (
@@ -420,8 +420,8 @@ function LiveView({
                   <h3>{snap.approved ? "승인하신 안으로 제작 중이에요" : "아직 올라온 안건이 없어요"}</h3>
                   <p>
                     {snap.approved
-                      ? "대표 승인 이후 원고 → 제작 → 보관까지 이어집니다."
-                      : "업무를 시작하면 콘텐츠 전략팀이 TOP 3를 회의실로 올려요."}
+                      ? "대표 승인 이후 대본·상품기획 → 제작 → 정산까지 이어집니다."
+                      : "업무를 시작하면 기획 1팀이 콘텐츠·상품 TOP 3를 회의실로 올려요."}
                   </p>
                 </>
               )}
@@ -471,7 +471,7 @@ function LiveView({
                           onClick={() => agent && onSelect(agent)}
                         >
                           <i style={{ background: seed.shirt, borderColor: seed.hair }} />
-                          {seed.name}
+                          {seed.callsign ?? seed.name}
                           <small>{agent?.status ?? "출근 전"}</small>
                         </button>
                       );
@@ -595,8 +595,8 @@ function ProfileModal({
             <div>
               <span className="status-pill working">{agent.status}</span>
               <h2>
-                {agent.name}
-                {agent.callsign ? <small> · {agent.callsign}</small> : null}
+                {agent.rank === "ceo" ? agent.name : agent.callsign ?? agent.name}
+                {agent.rank !== "ceo" ? <small> · {agent.name}</small> : agent.callsign ? <small> · {agent.callsign}</small> : null}
               </h2>
               <p>{agent.role}</p>
             </div>
@@ -663,7 +663,7 @@ function BriefingModal({ snap, onClose }: { snap: Snapshot; onClose: () => void 
           </ul>
           <div className="decision-box">
             <span className="tiny-label">오늘 대표님이 결정할 것</span>
-            <strong>없습니다. 내일 07:00에 다시 출근할게요 ✨</strong>
+            <strong>없습니다. 내일 10:00에 다시 출근할게요 ✨</strong>
           </div>
           <button className="btn btn-primary" onClick={onClose}>
             확인
@@ -749,11 +749,11 @@ function DashboardView({
         </div>
         <div className="hero-body">
           <div className="hero-copy">
-            <p className="eyebrow">TODAY · 07:00 AUTO START</p>
+            <p className="eyebrow">TODAY · 10:00 AUTO START</p>
             <h1>
               오늘 회사가 어떻게 움직이는지 <em className="highlight">한눈에</em> 보여드려요
             </h1>
-            <p>AI는 비서, 결정은 대표님. 12개 팀 32명의 조사부터 제작·저장·브리핑까지 한 흐름으로 관리해요.</p>
+            <p>AI는 비서, 결정은 대표님. 12개 팀 {STAFF.length}명의 조사부터 제작·정산·브리핑까지 한 흐름으로 관리해요.</p>
           </div>
           <div className="hero-actions">
             <button className="btn btn-primary" onClick={onStart} disabled={snap.running}>
@@ -803,7 +803,7 @@ function DashboardView({
               <div className="schedule-card">
                 <div>
                   <span className="tiny-label">NEXT RUN</span>
-                  <strong>매일 오전 7:00</strong>
+                  <strong>매일 오전 10:00</strong>
                   <p>컴퓨터 지시 없이 하루 업무 시작</p>
                 </div>
                 <span className="toggle-on">ON</span>
@@ -872,7 +872,7 @@ function DashboardView({
                     </span>
                     <span className="team-copy">
                       <b>
-                        {team.lead.name} · {team.name}
+                        {team.lead.callsign ?? team.lead.name} · {team.name}
                       </b>
                       <small>{team.task}</small>
                     </span>
@@ -891,15 +891,13 @@ function DashboardView({
               </div>
               <div className="win-body approval-body">
                 <div className="approval-top">
-                  <span className="mini-badge yellow">TOP 1 제안</span>
-                  <span className="score">92점</span>
+                  <span className="mini-badge yellow">콘텐츠 TOP 1 + 상품 TOP 1</span>
                 </div>
                 <h3>
-                  AI 회사가 매일 아침
-                  <br />
-                  나 대신 출근한다면?
+                  요즘 유행 비즈스트랩 언박싱
+                  <br />+ 신규 카스티커 세트
                 </h3>
-                <p>지금 만들고 있는 시스템 자체를 날것의 성장기로 공개하는 크리에이터 아이덴티티 콘텐츠예요.</p>
+                <p>브랜드검수까지 통과한 오늘의 콘텐츠 1개 · 상품 1개를 대표님이 확인하고 계세요.</p>
                 <button
                   className={`btn approve-button ${snap.approved ? "approved" : ""}`}
                   onClick={onApprove}
@@ -989,7 +987,7 @@ function DashboardView({
       </section>
 
       <p className="dash-note">
-        대표 {CEO.name}({CEO.callsign}) · AI 직원 {teams.length}개 부서 32명 · 이 화면은 라이브 오피스와 같은 상태를
+        대표 {CEO.name}({CEO.callsign}) · AI 직원 {teams.length}개 부서 {STAFF.length}명 · 이 화면은 라이브 오피스와 같은 상태를
         공유해요.
       </p>
     </>

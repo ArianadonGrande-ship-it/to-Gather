@@ -306,6 +306,21 @@
 @keyframes talkNod { 50% { transform: translateY(-1.5px); } }
 .a-sit .p-leg { height: 4px; }
 .a-sit .ag-body { transform: translate(-50%, calc(-100% + 3px)); }
+.a-coffee .p-leg { height: 4px; }
+.a-coffee .ag-body { transform: translate(-50%, calc(-100% + 3px)); }
+.a-coffee .p-arm.r { animation: coffeeSip 1.6s ease-in-out infinite; transform-origin: top center; }
+@keyframes coffeeSip {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  35%, 55% { transform: translateY(-3px) rotate(-18deg); }
+}
+.a-coffee .ag-body::before {
+  content: "☕";
+  position: absolute;
+  right: -7px;
+  bottom: 7px;
+  font-size: 8px;
+  line-height: 1;
+}
 .ag.selected .ag-body::after {
   content: "";
   position: absolute;
