@@ -490,6 +490,44 @@
 }
 .profile-actions { display: flex; gap: 10px; align-items: center; margin-top: 4px; }
 .profile-actions .btn { flex: 1; }
+.personal-chat { display: grid; gap: 6px; margin-top: 4px; }
+.personal-chat-log {
+  display: grid;
+  gap: 6px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding: 9px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: #fff8fb;
+}
+.personal-chat-hint { margin: 0; font-size: 11px; color: var(--ink-faint); line-height: 1.5; }
+.personal-line { max-width: 92%; padding: 6px 9px; border: 2px solid var(--ink); border-radius: 12px; background: #fff; font-size: 12px; animation: rise .25s ease both; }
+.personal-line b { display: block; font-size: 9px; color: var(--pink-deep); }
+.personal-line p { margin: 2px 0 0; line-height: 1.5; white-space: pre-line; word-break: keep-all; }
+.personal-line.ceo { justify-self: end; background: var(--pink); color: #fff; }
+.personal-line.ceo b { color: #fff6fb; }
+.personal-line.agent { justify-self: start; background: #fff; }
+.personal-chat-input { display: flex; gap: 6px; }
+.personal-chat-input input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 12px;
+}
+.personal-chat-input button {
+  padding: 8px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--pink-deep);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
 .rail-card .win-body { padding: 14px; }
 .approval-body.pending { background: linear-gradient(#fff, #fff2f8); }
 .score.blink { color: var(--pink-deep); animation: blinkDot 1s steps(2) infinite; }

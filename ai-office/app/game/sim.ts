@@ -831,6 +831,36 @@ export class Company {
     this.pushLog("🎤", `대표 지시: ${room.name} 상황 확인`, "yellow");
   }
 
+  /**
+   * 직원 프로필 창에서 그 사람에게만 1:1로 묻는다.
+   * 인사·격려는 그 사람 성격으로 짧게 받고, 업무 질문은 부서 보고 로직을 그대로 재사용한다.
+   * (실제 LLM 대화가 아니라 상태·혼잣말 기반의 규칙 응답입니다.)
+   */
+  askPersonal(agentId: string, question: string): string {
+    const agent = this.agentById.get(agentId);
+    const text = question.trim();
+    if (!agent || !text) return "";
+
+    if (agent.rank === "ceo") return "대표님이신데 저한테 물어보시는 거예요? 😄";
+    if (agent.status === "출근 전") return "아직 출근 전이에요. 오늘 업무를 시작하면 바로 답할게요.";
+
+    if (/안녕|하이|반가/.test(text)) {
+      const reply = rand([`안녕하세요, 대표님! ${agent.role}입니다.`, "네 대표님, 부르셨어요?"]);
+      this.say(agent, reply, 2.6);
+      return reply;
+    }
+    if (/수고|고마|잘했|좋아요|고생|화이팅|힘내/.test(text)) {
+      const reply = rand(["감사합니다 🩷", "더 잘해볼게요!", "힘이 나요 ✨"]);
+      this.say(agent, reply, 2.6);
+      return reply;
+    }
+
+    const before = this.chat.length;
+    this.deptReport(agent.deptId, text);
+    const added = this.chat.slice(before);
+    return added.length ? added[added.length - 1].text : rand(agent.thoughts);
+  }
+
   // ── 지시 실행 ────────────────────────────────────────────
   private setFocusMode(on: boolean) {
     this.focusMode = on;

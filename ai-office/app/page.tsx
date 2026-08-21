@@ -122,7 +122,7 @@ export default function Home() {
           `완료 보고 발행 — ${parts.join(" / ")}`,
           result.notion.ok && result.discord.ok ? "mint" : "lav",
         );
-        engine.pushChat("staff", "김세리", `보고서 발행 결과입니다.\n· ${parts.join("\n· ")}`);
+        engine.pushChat("staff", "켈리", `보고서 발행 결과입니다.\n· ${parts.join("\n· ")}`);
         if (!auto) showToast(result.notion.ok || result.discord.ok ? "보고서를 발행했어요" : "발행 실패 — 연동 설정 필요");
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -142,18 +142,6 @@ export default function Home() {
     }
     if (!snap.dayComplete && snap.running) publishedRef.current = false;
   }, [snap.dayComplete, snap.running, sendReport]);
-
-  const askAgent = useCallback(
-    (agent: Agent) => {
-      engine.command(`${agent.name} 지금 뭐해?`);
-      setSelectedId(null);
-      window.setTimeout(
-        () => document.getElementById("ceo-console")?.scrollIntoView({ behavior: "smooth", block: "center" }),
-        60,
-      );
-    },
-    [engine],
-  );
 
   const start = () => {
     engine.start();
@@ -261,14 +249,7 @@ export default function Home() {
       </div>
 
       {selected ? (
-        <ProfileModal
-          agent={selected}
-          onClose={() => setSelectedId(null)}
-          onAsk={(agent) => {
-            setView("live");
-            askAgent(agent);
-          }}
-        />
+        <ProfileModal key={selected.id} agent={selected} engine={engine} onClose={() => setSelectedId(null)} />
       ) : null}
       {briefing ? <BriefingModal snap={snap} onClose={() => setBriefing(false)} /> : null}
       <div className={`toast ${toast ? "show" : ""}`} role="status">
@@ -315,7 +296,7 @@ function LiveView({
           <h1>
             {COMPANY.titlePrefix} <em className="highlight">{COMPANY.titleAccent}</em>
           </h1>
-          <p>출근하고, 자리에서 일하고, 회의실에 모여 회의하고, 대표실로 보고하러 갑니다.</p>
+          <p>짧게 일하고, 효율적으로 협업하고, 간단하게 보고합니다.</p>
         </div>
         <div className="live-clock">
           <span>SEOUL</span>
@@ -565,15 +546,34 @@ function CeoConsole({ engine, snap }: { engine: Company; snap: Snapshot }) {
   );
 }
 
+type PersonalMsg = { from: "ceo" | "agent"; text: string };
+
 function ProfileModal({
   agent,
+  engine,
   onClose,
-  onAsk,
 }: {
   agent: Agent;
+  engine: Company;
   onClose: () => void;
-  onAsk: (agent: Agent) => void;
 }) {
+  const [thread, setThread] = useState<PersonalMsg[]>([]);
+  const [draft, setDraft] = useState("");
+  const logRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = logRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [thread.length]);
+
+  const send = (text: string) => {
+    const value = text.trim();
+    if (!value) return;
+    const reply = engine.askPersonal(agent.id, value);
+    setThread((prev) => [...prev, { from: "ceo", text: value }, ...(reply ? [{ from: "agent" as const, text: reply }] : [])]);
+    setDraft("");
+  };
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <section
@@ -614,10 +614,43 @@ function ProfileModal({
             <span className="tiny-label">한마디</span>
             <strong>{agent.speech ?? agent.thoughts[0]}</strong>
           </div>
+
+          {agent.rank !== "ceo" ? (
+            <div className="personal-chat">
+              <span className="tiny-label">1:1 대화</span>
+              <div className="personal-chat-log" ref={logRef}>
+                {thread.length === 0 ? (
+                  <p className="personal-chat-hint">
+                    "지금 뭐 하세요?" / "왜 늦어져요?" / "수고하셨어요" 처럼 편하게 물어보세요.
+                  </p>
+                ) : (
+                  thread.map((msg, i) => (
+                    <div key={i} className={`personal-line ${msg.from}`}>
+                      <b>{msg.from === "ceo" ? "대표님" : agent.callsign ?? agent.name}</b>
+                      <p>{msg.text}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+              <form
+                className="personal-chat-input"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  send(draft);
+                }}
+              >
+                <input
+                  value={draft}
+                  onChange={(event) => setDraft(event.target.value)}
+                  placeholder={`${agent.callsign ?? agent.name}에게 물어보기…`}
+                  aria-label={`${agent.name}에게 1:1로 묻기`}
+                />
+                <button type="submit">보내기</button>
+              </form>
+            </div>
+          ) : null}
+
           <div className="profile-actions">
-            <button className="btn btn-primary" onClick={() => onAsk(agent)}>
-              🎤 지금 뭐 하는지 물어보기
-            </button>
             <button className="text-button" onClick={onClose}>
               닫기
             </button>
@@ -636,7 +669,7 @@ function BriefingModal({ snap, onClose }: { snap: Snapshot; onClose: () => void 
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="김비서 브리핑"
+        aria-label="켈리 브리핑"
       >
         <div className="win-bar">
           <span>📋 kim_secretary.brief</span>
@@ -645,7 +678,7 @@ function BriefingModal({ snap, onClose }: { snap: Snapshot; onClose: () => void 
           </button>
         </div>
         <div className="win-body">
-          <p className="brief-date">{snap.clock} · 김세리 비서실장 최종 브리핑</p>
+          <p className="brief-date">{snap.clock} · 켈리 비서실장 최종 브리핑</p>
           <h3>대표님, 오늘 회사 업무가 정리됐어요.</h3>
           <ul>
             <li>

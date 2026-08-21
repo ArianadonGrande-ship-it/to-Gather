@@ -18,21 +18,21 @@
 /** 회사 기본 정보 */
 export const COMPANY = {
   /** 좌측 상단 헤더에 뜨는 회사 이름 */
-  name: "치코스튜디오",
+  name: "CHIKO STUDIO",
   /** 헤더 로고 배지에 들어갈 글자 1개 (이모지도 됩니다) */
   logoLetter: "C",
   /** 화면 상단 큰 제목 (앞부분) */
-  titlePrefix: "치코스튜디오의",
+  titlePrefix: "CHIKO STUDIO의",
   /** 화면 상단 큰 제목 (강조되는 뒷부분) */
   titleAccent: "AI Office",
   /** 브라우저 탭 제목 */
-  pageTitle: "치코스튜디오 — AI 오피스",
+  pageTitle: "CHIKO STUDIO — AI 오피스",
   /** 검색·공유될 때 뜨는 설명 */
-  description: "키치한 액세서리 브랜드 치코스튜디오, 12개 AI팀이 조사·기획·제작·정산까지 돌아가는 오피스",
+  description: "키치한 액세서리 브랜드 CHIKO STUDIO, 12개 AI팀이 조사·기획·제작·정산까지 돌아가는 오피스",
   /** 창 하단 파일명 느낌의 라벨 */
   windowLabel: "chiko_studio.exe — 대표실",
   /** 일일 브리핑 제목에 들어갈 이름 */
-  reportName: "치코스튜디오",
+  reportName: "CHIKO STUDIO",
 } as const;
 
 /** 대표(나) — 사무실 대표실에 앉아 있는 캐릭터 */
