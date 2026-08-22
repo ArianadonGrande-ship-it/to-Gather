@@ -38,11 +38,19 @@ export function buildReport(snap: Snapshot): DayReport {
     .filter(([, status]) => status === "연동 대기")
     .map(([dept]) => `${roomOf(dept).name} — ${BLOCK_NEED[dept] ?? "외부 연동"} 대기로 오늘 진행 불가`);
 
-  const decisions = snap.approved
-    ? ["TOP 1 콘텐츠 제작 승인 — 대본·제작까지 진행 완료"]
-    : snap.approvalPending
-      ? ["TOP 1 콘텐츠 승인 여부 (결재 대기 중)"]
-      : ["오늘 대표 결재 안건 없음"];
+  const item = snap.approvalItem;
+  const decisions =
+    snap.approved && item
+      ? [
+          `콘텐츠 승인 완료 — '${item.content.title}' (${item.content.hook})`,
+          `상품 승인 완료 — ${item.product.name} · ${item.product.spec} · ${item.product.price}`,
+        ]
+      : snap.approvalPending && item
+        ? [
+            `콘텐츠 승인 대기 — '${item.content.title}' · 근거: ${item.content.reason}`,
+            `상품 승인 대기 — ${item.product.name} · ${item.product.price}${item.note ? ` (대표 피드백 반영 중: ${item.note})` : ""}`,
+          ]
+        : ["오늘 대표 결재 안건 없음"];
 
   const next = [
     ...risks.map((risk) => `${risk.split(" — ")[0]}: 연동 완료되면 즉시 재가동`),
