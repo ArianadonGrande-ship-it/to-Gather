@@ -2,6 +2,8 @@
 
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { askPersonaAI } from "./game/chat";
+import { loadBrandMetrics, saveBrandMetrics } from "./game/metrics";
 import OfficeWorld from "./game/OfficeWorld";
 import {
   buildReport,
@@ -169,6 +171,74 @@ function ApprovalPanel({
         <button type="submit">수정 요청</button>
       </form>
     </div>
+  );
+}
+
+/** 브랜드분석팀이 쓸 이번 주 실제 숫자 입력 — 이 값이 있어야 브랜드분석팀이 추측 대신 진짜 분석을 해요 */
+function BrandMetricsPanel() {
+  const [form, setForm] = useState({ saves: "", reach: "", sales: "" });
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    const metrics = loadBrandMetrics();
+    if (metrics) {
+      setForm({ saves: String(metrics.saves), reach: String(metrics.reach), sales: String(metrics.sales) });
+      setSavedAt(new Date(metrics.updatedAt).toLocaleString("ko-KR"));
+    }
+  }, []);
+
+  const save = () => {
+    saveBrandMetrics({
+      saves: Number(form.saves) || 0,
+      reach: Number(form.reach) || 0,
+      sales: Number(form.sales) || 0,
+    });
+    setSavedAt(new Date().toLocaleString("ko-KR"));
+  };
+
+  return (
+    <section className="win">
+      <div className="win-bar">
+        <span>📊 brand.metrics</span>
+        <span className="window-controls">—　▢　✕</span>
+      </div>
+      <div className="win-body metrics-body">
+        <p className="tiny-label">이번 주 실제 숫자 (브랜드분석팀이 이 숫자로 분석해요)</p>
+        <div className="metrics-grid">
+          <label>
+            저장수
+            <input
+              type="number"
+              inputMode="numeric"
+              value={form.saves}
+              onChange={(event) => setForm((f) => ({ ...f, saves: event.target.value }))}
+            />
+          </label>
+          <label>
+            도달
+            <input
+              type="number"
+              inputMode="numeric"
+              value={form.reach}
+              onChange={(event) => setForm((f) => ({ ...f, reach: event.target.value }))}
+            />
+          </label>
+          <label>
+            판매건수
+            <input
+              type="number"
+              inputMode="numeric"
+              value={form.sales}
+              onChange={(event) => setForm((f) => ({ ...f, sales: event.target.value }))}
+            />
+          </label>
+        </div>
+        <button className="btn btn-primary" onClick={save}>
+          저장
+        </button>
+        {savedAt ? <small className="metrics-saved">마지막 저장: {savedAt}</small> : null}
+      </div>
+    </section>
   );
 }
 
@@ -687,12 +757,25 @@ function ProfileModal({
     if (el) el.scrollTop = el.scrollHeight;
   }, [thread.length]);
 
-  const send = (text: string) => {
+  const send = async (text: string) => {
     const value = text.trim();
     if (!value) return;
-    const reply = engine.askPersonal(agent.id, value);
-    setThread((prev) => [...prev, { from: "ceo", text: value }, ...(reply ? [{ from: "agent" as const, text: reply }] : [])]);
+    const history = thread.map((m) => ({
+      role: m.from === "ceo" ? ("user" as const) : ("assistant" as const),
+      content: m.text,
+    }));
+    setThread((prev) => [...prev, { from: "ceo", text: value }]);
     setDraft("");
+
+    // 먼저 OpenAI로 실제 대화를 시도하고, 키가 없거나 실패하면 규칙 기반 답변으로 대체한다
+    const ai = await askPersonaAI(agent.id, { name: agent.name, role: agent.role, thoughts: agent.thoughts }, history, value);
+    if (ai.ok && ai.reply) {
+      setThread((prev) => [...prev, { from: "agent", text: ai.reply! }]);
+      engine.say(agent, ai.reply.length > 60 ? `${ai.reply.slice(0, 57)}…` : ai.reply, 3);
+      return;
+    }
+    const reply = engine.askPersonal(agent.id, value);
+    if (reply) setThread((prev) => [...prev, { from: "agent", text: reply }]);
   };
 
   return (
@@ -902,6 +985,12 @@ function DashboardView({
           tone: publishResult?.slack.ok ? "mint" : integrations.slack?.configured ? "yellow" : "lav",
           href: "",
         },
+        {
+          name: "OpenAI 대화",
+          status: integrations.openai?.configured ? "키 설정됨" : "키 미설정",
+          tone: integrations.openai?.configured ? "yellow" : "lav",
+          href: "",
+        },
         { name: "Instagram", status: integrations.instagram?.need ?? "연동 대기", tone: "lav", href: "" },
         { name: "Gmail", status: integrations.gmail?.need ?? "연동 대기", tone: "lav", href: "" },
         { name: "재무 파일", status: integrations.finance?.need ?? "자료 대기", tone: "lav", href: "" },
@@ -1012,6 +1101,8 @@ function DashboardView({
               )}
             </div>
           </section>
+
+          <BrandMetricsPanel />
         </aside>
 
         <div className="main-stack">

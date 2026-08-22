@@ -23,6 +23,7 @@ export type PublishEnv = {
   NOTION_TOKEN?: string;
   NOTION_BRIEFING_DB?: string;
   SLACK_WEBHOOK_URL?: string;
+  OPENAI_API_KEY?: string;
 };
 
 type TargetResult = { ok: boolean; status: "sent" | "unconfigured" | "failed"; detail?: string; url?: string };
@@ -33,6 +34,7 @@ export function integrationStatus(env: PublishEnv) {
   return {
     notion: { configured: Boolean(env.NOTION_TOKEN && env.NOTION_BRIEFING_DB), label: "Notion 저장" },
     slack: { configured: Boolean(env.SLACK_WEBHOOK_URL), label: "Slack 전송" },
+    openai: { configured: Boolean(env.OPENAI_API_KEY), label: "OpenAI 대화" },
     // 아래 3개는 자격증명을 받는 즉시 같은 방식으로 붙는다
     instagram: { configured: false, label: "Instagram 지표", need: "Meta 비즈니스 앱 + 장기 액세스 토큰" },
     gmail: { configured: false, label: "Gmail 읽기", need: "Google OAuth 클라이언트 + 리프레시 토큰" },

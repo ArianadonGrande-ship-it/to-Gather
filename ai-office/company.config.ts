@@ -62,7 +62,7 @@ export const DEPARTMENTS = [
     name: "시장조사팀",
     short: "trend.lab",
     icon: "🔎",
-    task: "경쟁 상품 가격대·구성 서칭 + SNS 트렌드 수집",
+    task: "비즈스트랩·폰스트랩 신제품 디자인·트렌드 서칭",
     report: "공식 출처만 확인해서 오늘 후보를 정리해요.",
   },
   {
@@ -70,8 +70,8 @@ export const DEPARTMENTS = [
     name: "브랜드분석팀",
     short: "brand.room",
     icon: "🧬",
-    task: "최근 7일 저장·판매 흐름 점검",
-    report: "데이터 없으면 추측 대신 미연동이라 적어요.",
+    task: "이번 주 저장·도달·판매 숫자로 흐름 분석",
+    report: "숫자 입력해주시면 그걸로 분석하고, 없으면 미연동이라 적어요.",
   },
   {
     id: "strategy1",
@@ -115,11 +115,11 @@ export const DEPARTMENTS = [
   },
   {
     id: "partner",
-    name: "협업 소통팀",
-    short: "partner.mail",
-    icon: "💌",
-    task: "협찬·제휴 제안 검토·답장 초안",
-    report: "초안까지만 씁니다. 발송은 대표가 해요.",
+    name: "협업·입점팀",
+    short: "partner.retail",
+    icon: "🏬",
+    task: "협찬·제휴 제안 검토 + 오프라인 입점 제안서·미팅 준비",
+    report: "입점 제안 포인트랑 협업 답장 초안까지 같이 준비해요. 발송은 대표가 해요.",
   },
   {
     id: "finance",
@@ -142,8 +142,8 @@ export const DEPARTMENTS = [
     name: "마케팅팀",
     short: "ads.ops",
     icon: "📣",
-    task: "광고비 대비 성과 파악·채널별 집행 제안",
-    report: "정확한 수치 없인 증액·감액 판단 안 해요.",
+    task: "채널별 신규 마케팅 아이디어 제안 + 광고 성과 파악",
+    report: "광고 수치는 연동되면 붙이고, 아이디어는 숫자 없어도 냅니다.",
   },
   {
     id: "secretary",
@@ -182,7 +182,7 @@ export const STAFF_LIST: StaffEntry[] = [
     callsign: "Nova",
     role: "시장조사 팀장",
     colors: ["#6b3d34", "#fff3b0", "#ff8fc0"],
-    thoughts: ["요즘 이게 유행이잖아요, 놓치면 안 돼요.", "이거 지금이 막차예요, 다들 곧 이거 할 걸요.", "출처 없는 소문은 후보에도 안 올려요."],
+    thoughts: ["요즘 비즈스트랩·폰스트랩 이 조합이 유행이잖아요, 놓치면 안 돼요.", "이거 지금이 막차예요, 다들 곧 이거 할 걸요.", "출처 없는 소문은 후보에도 안 올려요."],
   },
 
   // ② 브랜드분석팀 — Sage
@@ -257,9 +257,13 @@ export const STAFF_LIST: StaffEntry[] = [
     rank: "lead",
     name: "아이비",
     callsign: "Ivy",
-    role: "협업 소통 팀장",
+    role: "협업·입점 팀장",
     colors: ["#563a32", "#b8f0dd", "#b8f0dd"],
-    thoughts: ["실제 발송은 제가 안 해요, 초안까지만.", "브랜드 핏 안 맞으면 정중히 거절 초안 써요.", "금액·기간 없으면 확인 필요로 남겨요."],
+    thoughts: [
+      "오프라인 매대에서 눈에 띄는 패키징부터 고민해요.",
+      "입점 제안서엔 우리 판매 데이터부터 넣어야 신뢰가 가요.",
+      "실제 발송·계약은 제가 안 해요, 초안까지만.",
+    ],
   },
 
   // ⑨ 정산팀 — Theo
@@ -292,7 +296,11 @@ export const STAFF_LIST: StaffEntry[] = [
     callsign: "Leo",
     role: "마케팅 팀장",
     colors: ["#3b3b49", "#b8f0dd", "#b8f0dd"],
-    thoughts: ["정확한 수치 없인 증액도 감액도 못 정해요.", "연동 안 된 채널은 미연동으로 남겨둬요.", "채널별로 어디서 먹혔는지부터 봐요."],
+    thoughts: [
+      "숫자 없어도 아이디어는 낼 수 있어요.",
+      "이번 주엔 이 각도로 한번 밀어볼까요?",
+      "정확한 광고 수치는 연동되면 그때 붙일게요.",
+    ],
   },
 
   // ⑫ 비서실 — Kelly
@@ -314,7 +322,6 @@ export const STAFF_LIST: StaffEntry[] = [
  */
 export const PENDING_INTEGRATIONS: Record<string, string> = {
   review: "Instagram/판매 데이터 연동",
-  ops: "광고 채널 성과 데이터 연동",
 };
 
 /**

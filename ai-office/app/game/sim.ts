@@ -1,6 +1,7 @@
 // 라이브 오피스 시뮬레이션 엔진
 // 직원 상태머신 + A* 이동 + 회의 엔진 + 하루 시나리오 스크립트
 
+import { brandReportFromMetrics } from "./metrics";
 import { findPath } from "./pathfinding";
 import { CEO, DEPT_BRIEF, DEPT_LEAD, STAFF, type StaffSeed } from "./staff";
 import {
@@ -106,7 +107,7 @@ export type ContentBrief = { title: string; hook: string; reason: string; target
 export type ProductBrief = { name: string; spec: string; price: string };
 export type ApprovalItem = { content: ContentBrief; product: ProductBrief; note?: string };
 
-/** 승인 대기 중인 콘텐츠·상품 후보 — 폐기하면 다음 후보로 넘어간다 */
+/** 승인 대기 중인 콘텐츠·상품 후보 — 폐기하면 다음 후보로 넘어간다 (비즈스트랩·폰스트랩 집중) */
 const BRIEF_POOL: { content: ContentBrief; product: ProductBrief }[] = [
   {
     content: {
@@ -115,7 +116,7 @@ const BRIEF_POOL: { content: ContentBrief; product: ProductBrief }[] = [
       reason: "최근 7일 저장률 1위 포맷 + 공식 트렌드 확인 완료",
       target: "20대 후반 여성",
     },
-    product: { name: "신규 카스티커 세트", spec: "5매입 · 방수 코팅 · 3color", price: "9,900원" },
+    product: { name: "비즈 참 폰스트랩", spec: "5color · 스트랩 길이 조절 가능 · 방수 비즈", price: "9,900원" },
   },
   {
     content: {
@@ -124,16 +125,16 @@ const BRIEF_POOL: { content: ContentBrief; product: ProductBrief }[] = [
       reason: "경쟁 콘텐츠 대비 저장 각도 차별화, 브랜드분석팀 확인",
       target: "20대 여성 · 데스크테리어",
     },
-    product: { name: "파스텔 비즈 팔찌 3종 세트", spec: "논알러지 소재 · 사이즈 조절 가능", price: "12,900원" },
+    product: { name: "파스텔 비즈 팔찌·폰스트랩 3종 세트", spec: "논알러지 소재 · 팔찌·폰스트랩 겸용 고리", price: "12,900원" },
   },
   {
     content: {
-      title: "친구한테 만들어준 커스텀 카스티커",
+      title: "친구가 만들어준 커스텀 폰스트랩",
       hook: "선물로 하나쯤은 있어야 하는 이유",
-      reason: "협업소통팀 제휴 제안과 시너지 가능",
+      reason: "협업·입점팀 제휴 제안과 시너지 가능",
       target: "20대 여성 · 선물용",
     },
-    product: { name: "커스텀 각인 카스티커", spec: "이니셜 각인 · 주문제작 3일 소요", price: "14,900원" },
+    product: { name: "커스텀 이니셜 비즈스트랩", spec: "이니셜 비즈 각인 · 주문제작 3일 소요", price: "14,900원" },
   },
 ];
 
@@ -178,12 +179,11 @@ const PHASES = [
 ];
 
 /** 실제로 업무가 외부 연동 부재로 멈춰 있는 팀만 (기획·진행 중인 팀은 제외) */
-const BLOCKED_DEPTS = new Set(["review", "ops"]);
+const BLOCKED_DEPTS = new Set(["review"]);
 
 /** 연동 대기 부서가 멈춰 있는 진짜 이유 */
 const BLOCK_REASON: Record<string, string> = {
   review: "Instagram·스토어 판매 데이터가 아직 연동 전이라 저장·전환 수치를 읽을 수 없어요. 없는 숫자를 만들지는 않습니다. 연동만 되면 바로 돌려요.",
-  ops: "인스타·스마트스토어 광고 채널 성과 데이터가 아직 연동 전이라 증액·감액 판단을 못 내려요. 연동되면 바로 채널별 제안안을 만듭니다.",
 };
 
 /** 지시창에서 부서를 찾을 때 쓰는 키워드 — 구체적인 것부터 검사한다 */
@@ -195,7 +195,7 @@ const DEPT_KEYWORDS: [string, string[]][] = [
   ["research", ["시장조사", "리서치", "조사팀", "경쟁 상품", "노바", "nova"]],
   ["reels", ["릴스", "영상", "편집", "맥스", "max"]],
   ["carousel", ["캐러셀", "이미지 제작", "상세페이지", "미아", "mia"]],
-  ["partner", ["협업", "협찬", "제휴", "아이비", "ivy"]],
+  ["partner", ["협업", "협찬", "제휴", "입점", "아이비", "ivy"]],
   ["finance", ["재무", "정산", "입금", "돈", "테오", "theo"]],
   ["review", ["성과", "리뷰", "지표", "조이", "zoe"]],
   ["ops", ["마케팅", "광고", "채널", "레오", "leo"]],
@@ -436,7 +436,7 @@ export class Company {
 
     // ③ 브랜드분석팀 — 저장·판매 흐름 점검
     this.phaseIndex = 3;
-    yield* this.runDept("brand", "최근 7일 저장·판매 흐름 점검", 5.5, "잘된 콘텐츠·상품 유형 각각 하나씩 정리했어요.");
+    yield* this.runDept("brand", "이번 주 저장·도달·판매 숫자로 흐름 분석", 5.5, brandReportFromMetrics());
 
     // ④ 회의 — 시장조사·브랜드분석 → 기획1팀 인수인계
     yield* this.meeting(
@@ -560,23 +560,16 @@ export class Company {
     yield () => this.deptStatus.reels === "완료" && this.deptStatus.carousel === "완료";
     this.pushLog("🎬", "릴스 초안 1건 · 캐러셀+상세페이지 구성 완료 (원본 마스터는 그대로 보존)", "mint");
 
-    // ⑪ 정산 / 마케팅 병행 — 정산은 실제 진행, 마케팅은 광고 채널 연동 대기
+    // ⑪ 정산 / 마케팅 / 협업·입점 병행 — 셋 다 실제로 진행한다
     this.phaseIndex = 10;
     this.startDept("finance", "이번 주 입금 대기 건 정리", 6);
-    const leo = this.agentById.get("ops-lead")!;
-    this.stand(leo);
-    this.say(leo, "광고 채널 데이터가 아직 미연동이라 판단을 못 내려요.", 3);
-    this.pushLog("📣", "마케팅팀: 광고 채널 성과 데이터 미연동 → 증액·감액 판단 보류, 기록만 남김", "lav");
-    this.goto(leo, rand(LOUNGE_ROOM.loiter), "휴식");
-    this.enqueue(
-      leo,
-      { k: "anim", a: "coffee" },
-      { k: "wait", dur: 4 },
-      { k: "fn", fn: () => this.say(leo, "연동되면 바로 채널별 제안 만들게요.", 2.4) },
-    );
-    this.sitAtDesk(leo);
-    yield () => this.deptStatus.finance === "완료";
+    this.startDept("ops", "채널별 신규 마케팅 아이디어 브레인스토밍", 6);
+    this.startDept("partner", "오프라인 입점 제안서 초안 + 협업 제안 검토", 6.5);
+    yield () =>
+      this.deptStatus.finance === "완료" && this.deptStatus.ops === "완료" && this.deptStatus.partner === "완료";
     this.pushLog("🧾", "정산팀: 입금 대기 3건 정리 완료 (결제는 진행하지 않음)", "mint");
+    this.pushLog("📣", "마케팅팀: 광고 수치는 아직 미연동이지만, 이번 주 밀어볼 마케팅 아이디어 3개 정리 완료", "mint");
+    this.pushLog("🏬", "협업·입점팀: 오프라인 입점 제안서 초안 + 협찬 답장 초안 완료", "mint");
 
     // ⑫ 성과리뷰팀 — SNS/판매 데이터 미연동
     const zoe = this.agentById.get("review-lead")!;
