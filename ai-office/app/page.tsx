@@ -188,6 +188,7 @@ export default function Home() {
     error: "",
   });
   const publishedRef = useRef(false);
+  const lastApprovalKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     let raf = 0;
@@ -262,6 +263,19 @@ export default function Home() {
     }
     if (!snap.dayComplete && snap.running) publishedRef.current = false;
   }, [snap.dayComplete, snap.running, sendReport]);
+
+  // 승인 대기 안건이 새로 올라오거나(첫 등장·수정요청·폐기로 바뀔 때마다) 자동으로 한 번 발행한다
+  useEffect(() => {
+    if (snap.approvalPending && snap.approvalItem) {
+      const key = `${snap.approvalItem.content.title}·${snap.approvalItem.note ?? ""}`;
+      if (lastApprovalKeyRef.current !== key) {
+        lastApprovalKeyRef.current = key;
+        void sendReport(true);
+      }
+    } else {
+      lastApprovalKeyRef.current = null;
+    }
+  }, [snap.approvalPending, snap.approvalItem, sendReport]);
 
   const start = () => {
     engine.start();
