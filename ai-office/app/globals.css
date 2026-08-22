@@ -219,6 +219,17 @@ a.integration-row:hover { border-color: var(--pink-deep); }
   cursor: pointer;
 }
 .result-empty { margin: 0; padding: 18px 12px; text-align: center; color: var(--ink-soft); font-size: 12px; }
+.metrics-body { display: grid; gap: 10px; }
+.metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.metrics-grid label { display: grid; gap: 4px; font-size: 11px; font-weight: 700; color: var(--ink-soft); }
+.metrics-grid input {
+  padding: 7px 8px;
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  font-size: 13px;
+  width: 100%;
+}
+.metrics-saved { color: var(--ink-faint); font-size: 10px; }
 .brief-date { margin: 0; color: var(--pink-deep); font: 900 10px "Archivo", "Noto Sans KR", sans-serif; }
 .secretary ul { display: grid; gap: 9px; margin: 13px 0; padding: 0; list-style: none; }
 .secretary li { display: flex; align-items: center; gap: 8px; color: var(--ink-soft); font-size: 11px; }

@@ -1,6 +1,7 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { chatWithPersona, type ChatRequest } from "./chat";
 import { integrationStatus, publishReport, type DayReport, type PublishEnv } from "./report";
 
 interface Env extends PublishEnv {
@@ -44,6 +45,18 @@ const worker = {
         return Response.json(result);
       } catch (error) {
         return Response.json({ error: String(error) }, { status: 400 });
+      }
+    }
+
+    // 직원 1:1 대화 — OpenAI로 실제 응답 생성 (키 없으면 클라이언트가 규칙 기반으로 대체)
+    if (url.pathname === "/api/chat") {
+      if (request.method !== "POST") return new Response("POST only", { status: 405 });
+      try {
+        const body = (await request.json()) as ChatRequest;
+        const result = await chatWithPersona(body, env);
+        return Response.json(result);
+      } catch (error) {
+        return Response.json({ ok: false, detail: String(error) }, { status: 400 });
       }
     }
 
