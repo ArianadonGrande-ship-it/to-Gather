@@ -59,11 +59,18 @@ function richText(content: string) {
   return [{ type: "text", text: { content: content.slice(0, 1900) } }];
 }
 
-async function sendNotion(report: DayReport, env: PublishEnv): Promise<TargetResult> {
-  if (!env.NOTION_TOKEN || !env.NOTION_BRIEFING_DB) {
-    return { ok: false, status: "unconfigured", detail: "NOTION_TOKEN / NOTION_BRIEFING_DB 미설정" };
-  }
+function linesToBlocks(items: string[]) {
+  const list = items.filter(Boolean);
+  if (!list.length) list.push("없음");
+  return list.map((line) => ({
+    object: "block",
+    type: "bulleted_list_item",
+    bulleted_list_item: { rich_text: richText(line) },
+  }));
+}
 
+/** NOTION_BRIEFING_DB가 진짜 데이터베이스면 표 형태로 행 하나를 추가한다 */
+async function createDatabaseRow(report: DayReport, env: PublishEnv): Promise<TargetResult | "not_a_database"> {
   const body = {
     parent: { database_id: env.NOTION_BRIEFING_DB },
     properties: {
@@ -107,13 +114,78 @@ async function sendNotion(report: DayReport, env: PublishEnv): Promise<TargetRes
 
   const json = (await response.json().catch(() => ({}))) as { url?: string; message?: string; code?: string };
   if (!response.ok) {
+    if (json.code === "validation_error" && /is a page, not a database/i.test(json.message ?? "")) {
+      return "not_a_database";
+    }
     const hint =
       json.code === "object_not_found"
-        ? "DB를 통합에 연결하지 않았어요. Notion에서 페이지 ⋯ → 연결 → 통합 추가."
+        ? "페이지를 통합에 연결하지 않았어요. Notion에서 페이지 ⋯ → 연결 → 통합 추가."
         : json.message ?? `HTTP ${response.status}`;
     return { ok: false, status: "failed", detail: hint };
   }
   return { ok: true, status: "sent", url: json.url };
+}
+
+/** NOTION_BRIEFING_DB가 일반 페이지면(표를 안 만들었어도) 그 페이지 아래에 브리핑을 블록으로 그냥 붙인다 */
+async function appendToPage(report: DayReport, env: PublishEnv): Promise<TargetResult> {
+  const pageId = env.NOTION_BRIEFING_DB!;
+  const children = [
+    { object: "block", type: "heading_2", heading_2: { rich_text: richText(report.title) } },
+    {
+      object: "block",
+      type: "paragraph",
+      paragraph: {
+        rich_text: richText(
+          `완료 ${report.counts.done} · 진행 중 ${report.counts.working} · 승인 대기 ${report.counts.approval} · 연동 대기 ${report.counts.blocked}`,
+        ),
+      },
+    },
+    { object: "block", type: "heading_3", heading_3: { rich_text: richText("핵심 성과") } },
+    ...linesToBlocks(report.highlights),
+    { object: "block", type: "heading_3", heading_3: { rich_text: richText("대표 결정사항") } },
+    ...linesToBlocks(report.decisions),
+    { object: "block", type: "heading_3", heading_3: { rich_text: richText("문제·위험") } },
+    ...linesToBlocks(report.risks),
+    { object: "block", type: "heading_3", heading_3: { rich_text: richText("다음 우선순위") } },
+    ...linesToBlocks(report.next),
+    { object: "block", type: "heading_3", heading_3: { rich_text: richText("오늘 진행 로그") } },
+    ...report.log.slice(0, 40).map((entry) => ({
+      object: "block",
+      type: "bulleted_list_item",
+      bulleted_list_item: { rich_text: richText(`${entry.time}  ${entry.text}`) },
+    })),
+  ];
+
+  const response = await fetch(`https://api.notion.com/v1/blocks/${pageId}/children`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${env.NOTION_TOKEN}`,
+      "Notion-Version": NOTION_VERSION,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ children }),
+  });
+
+  const json = (await response.json().catch(() => ({}))) as { message?: string; code?: string };
+  if (!response.ok) {
+    const hint =
+      json.code === "object_not_found"
+        ? "페이지를 통합에 연결하지 않았어요. Notion에서 페이지 ⋯ → 연결 → 통합 추가."
+        : json.message ?? `HTTP ${response.status}`;
+    return { ok: false, status: "failed", detail: hint };
+  }
+  return { ok: true, status: "sent", url: `https://notion.so/${pageId.replace(/-/g, "")}` };
+}
+
+async function sendNotion(report: DayReport, env: PublishEnv): Promise<TargetResult> {
+  if (!env.NOTION_TOKEN || !env.NOTION_BRIEFING_DB) {
+    return { ok: false, status: "unconfigured", detail: "NOTION_TOKEN / NOTION_BRIEFING_DB 미설정" };
+  }
+
+  const result = await createDatabaseRow(report, env);
+  if (result !== "not_a_database") return result;
+  // 데이터베이스가 아니라 일반 페이지였다면, 표 대신 그 페이지 아래에 블록으로 기록한다
+  return appendToPage(report, env);
 }
 
 async function sendSlack(report: DayReport, env: PublishEnv, notionUrl?: string): Promise<TargetResult> {
